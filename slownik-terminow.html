@@ -186,6 +186,18 @@ font-style:italic;color:var(--ink-soft);font-size:.98rem;
     font-family:"Fraunces",serif;font-size:.9rem;color:var(--paper);background:var(--ink);
     border:none;border-radius:999px;padding:.6rem 1.15rem;box-shadow:0 6px 20px rgba(0,0,0,.28);cursor:pointer}
   .backbtn:hover{background:var(--accent)}
+  /* zwijanie filtrów — tylko na telefonie */
+  .filters-toggle{display:none}
+  @media(max-width:560px){
+    .filters-toggle{
+      display:inline-flex;align-items:center;gap:.4rem;margin-top:.7rem;
+      font-family:"Fraunces",serif;font-size:.82rem;letter-spacing:.03em;
+      padding:.5rem 1.05rem;border:1.5px solid var(--rule);border-radius:999px;
+      background:transparent;color:var(--ink-soft);cursor:pointer;
+    }
+    #filters{display:none}
+    #filters.open{display:block}
+  }
 
   /* ---------- Add form ---------- */
   .addbox{margin-top:2.5rem;border:1.5px dashed var(--rule);border-radius:4px;background:rgba(251,246,236,.6)}
@@ -253,6 +265,8 @@ font-style:italic;color:var(--ink-soft);font-size:.98rem;
       <svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round"><circle cx="11" cy="11" r="7"/><path d="m21 21-4.3-4.3"/></svg>
       <input id="q" type="text" placeholder="Szukaj słowa lub znaczenia…" autocomplete="off">
     </div>
+    <button class="filters-toggle" id="filtersToggle" type="button" aria-expanded="false">Filtry ▾</button>
+    <div id="filters">
     <div class="chips-label">Kategoria</div>
     <div class="chips" id="chips"></div>
     <div class="chips-label">Projekt</div>
@@ -265,6 +279,7 @@ font-style:italic;color:var(--ink-soft);font-size:.98rem;
         <span class="track"><span class="knob"></span></span>
         <span class="switch-txt">Ukryj opanowane (★★★)</span>
       </label>
+    </div>
     </div>
     <div class="countbar" id="countbar"></div>
   </div>
@@ -916,6 +931,17 @@ hideChk.addEventListener("change", e=>{
   localStorage.setItem(LS_HIDE, hideMastered ? "1" : "0");
   render();
 });
+
+/* ---------- zwijanie filtrów na telefonie ---------- */
+const filtersToggle = document.getElementById("filtersToggle");
+if(filtersToggle){
+  filtersToggle.onclick = ()=>{
+    const f = document.getElementById("filters");
+    const open = f.classList.toggle("open");
+    filtersToggle.setAttribute("aria-expanded", open);
+    filtersToggle.textContent = open ? "Filtry ▴" : "Filtry ▾";
+  };
+}
 
 /* ---------- init ---------- */
 buildChips();
