@@ -1,0 +1,926 @@
+<!DOCTYPE html>
+<html lang="pl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Słownik terminów — wszystkie projekty</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,400;0,9..144,600;0,9..144,900;1,9..144,400&family=Newsreader:ital,opsz,wght@0,6..72,400;0,6..72,500;1,6..72,400&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --paper:#f4ecdd;
+    --paper-2:#efe4cf;
+    --card:#fbf6ec;
+    --ink:#241d13;
+    --ink-soft:#6a5d49;
+    --ink-faint:#9a8c74;
+    --accent:#b14b2c;
+    --accent-deep:#8a3818;
+    --teal:#2f6b5e;
+    --gold:#9a6b1c;
+    --plum:#6d3551;
+    --rule:rgba(36,29,19,.14);
+    --rule-soft:rgba(36,29,19,.08);
+  }
+  *{box-sizing:border-box;margin:0;padding:0}
+  html{scroll-behavior:smooth}
+  body{
+    background:
+      radial-gradient(1200px 600px at 80% -10%, rgba(177,75,44,.06), transparent 60%),
+      radial-gradient(900px 500px at -10% 20%, rgba(47,107,94,.06), transparent 55%),
+      var(--paper);
+    color:var(--ink);
+    font-family:"Newsreader",Georgia,serif;
+    font-size:18px;
+    line-height:1.55;
+    -webkit-font-smoothing:antialiased;
+    padding-bottom:6rem;
+  }
+  /* subtle paper grain */
+  body::before{
+    content:"";position:fixed;inset:0;pointer-events:none;z-index:0;opacity:.5;
+    background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='160' height='160'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.9' numOctaves='2' stitchTiles='stitch'/%3E%3CfeColorMatrix type='saturate' values='0'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='.04'/%3E%3C/svg%3E");
+  }
+  .wrap{position:relative;z-index:1;max-width:none;margin:0 auto;padding:0 2.5rem}
+
+  /* ---------- Masthead ---------- */
+  header.masthead{padding:3.2rem 0 1.8rem;border-bottom:2px solid var(--ink)}
+  .kicker{
+    font-family:"Fraunces",serif;font-weight:600;letter-spacing:.42em;
+    text-transform:uppercase;font-size:.72rem;color:var(--accent);
+    margin-bottom:.9rem;padding-left:.1em;
+  }
+  h1{
+    font-family:"Fraunces",serif;font-weight:900;font-size:clamp(2.6rem,7vw,4.4rem);
+    line-height:.95;letter-spacing:-.015em;color:var(--ink);
+  }
+  h1 em{font-style:italic;color:var(--accent);font-weight:400}
+  .lede{
+    margin-top:1.1rem;max-width:54ch;color:var(--ink-soft);font-size:1.08rem;
+    font-style:italic;
+  }
+  .meta-line{
+    margin-top:1.4rem;display:flex;flex-wrap:wrap;gap:.4rem 1.4rem;align-items:baseline;
+    font-family:"Fraunces",serif;font-size:.82rem;color:var(--ink-faint);
+    letter-spacing:.04em;
+  }
+  .meta-line b{color:var(--ink);font-weight:600}
+
+  /* ---------- Controls ---------- */
+  .controls{
+    position:sticky;top:0;z-index:5;margin-top:0;padding:1rem 0 .9rem;
+    background:linear-gradient(var(--paper) 78%,rgba(244,236,221,0));
+  }
+  .search-row{position:relative;display:flex;align-items:center}
+  .search-row svg{position:absolute;left:1rem;width:18px;height:18px;stroke:var(--ink-faint);pointer-events:none}
+  #q{
+    width:100%;padding:.85rem 1rem .85rem 2.9rem;border:1.5px solid var(--ink);
+    background:var(--card);color:var(--ink);font-family:"Newsreader",serif;font-size:1.05rem;
+    border-radius:2px;outline:none;transition:box-shadow .15s,border-color .15s;
+  }
+  #q::placeholder{color:var(--ink-faint);font-style:italic}
+  #q:focus{border-color:var(--accent);box-shadow:0 0 0 3px rgba(177,75,44,.16)}
+  .chips{display:flex;flex-wrap:wrap;gap:.45rem;margin-top:.8rem}
+  .chips-label{font-family:"Fraunces",serif;font-size:.68rem;letter-spacing:.14em;text-transform:uppercase;color:var(--ink-faint);margin:.85rem 0 .15rem}
+  .chip{
+    font-family:"Fraunces",serif;font-size:.78rem;letter-spacing:.03em;
+    padding:.32rem .8rem;border:1.5px solid var(--rule);border-radius:999px;
+    background:transparent;color:var(--ink-soft);cursor:pointer;
+    transition:all .15s;user-select:none;
+  }
+  .chip:hover{border-color:var(--ink-soft)}
+  .chip.active{background:var(--ink);color:var(--paper);border-color:var(--ink)}
+  .countbar{
+    margin-top:.85rem;font-family:"Fraunces",serif;font-size:.78rem;
+    letter-spacing:.05em;color:var(--ink-faint);text-transform:uppercase;
+  }
+
+  /* ---------- Toolbar: sortowanie + ukrywanie ---------- */
+  .toolbar{display:flex;flex-wrap:wrap;align-items:center;gap:.7rem 1.3rem;margin-top:.9rem}
+  .toggle{
+    display:inline-flex;align-items:center;gap:.4rem;cursor:pointer;
+    font-family:"Fraunces",serif;font-size:.8rem;letter-spacing:.03em;
+    padding:.42rem .9rem;border:1.5px solid var(--rule);border-radius:999px;
+    background:transparent;color:var(--ink-soft);transition:all .15s;
+  }
+  .toggle:hover{border-color:var(--ink-soft)}
+  .toggle.active{background:var(--accent);color:#fff;border-color:var(--accent)}
+  .toggle .ic{font-size:.95rem;line-height:1}
+  .switch{display:inline-flex;align-items:center;gap:.55rem;cursor:pointer;user-select:none}
+  .switch input{position:absolute;opacity:0;width:0;height:0}
+  .switch .track{position:relative;width:38px;height:22px;border-radius:999px;background:var(--rule);transition:background .18s;flex:none}
+  .switch .knob{position:absolute;top:3px;left:3px;width:16px;height:16px;border-radius:50%;background:var(--card);box-shadow:0 1px 3px rgba(0,0,0,.3);transition:transform .18s}
+  .switch input:checked + .track{background:var(--teal)}
+  .switch input:checked + .track .knob{transform:translateX(16px)}
+  .switch .switch-txt{font-family:"Fraunces",serif;font-size:.8rem;letter-spacing:.03em;color:var(--ink-soft)}
+  .switch input:focus-visible + .track{box-shadow:0 0 0 3px rgba(47,107,94,.3)}
+
+  /* ---------- Gwiazdki znajomości ---------- */
+  .stars{display:inline-flex;align-items:center;gap:.1rem;margin-left:auto;align-self:center}
+  .stars-label{font-family:"Fraunces",serif;font-size:.58rem;letter-spacing:.12em;text-transform:uppercase;color:var(--ink-faint);margin-right:.35rem}
+  .star{background:none;border:none;cursor:pointer;font-size:1.18rem;line-height:1;color:var(--rule);padding:0 1px;transition:color .12s,transform .12s}
+  .star:hover{transform:scale(1.2);color:var(--gold)}
+  .star.on{color:var(--gold)}
+
+  /* ---------- Entries ---------- */
+  main{margin-top:.6rem}
+  .entry{
+    padding:1.5rem 0 1.4rem;border-bottom:1px solid var(--rule-soft);
+    display:grid;grid-template-columns:1fr;gap:.5rem;
+    opacity:0;transform:translateY(8px);
+    animation:rise .5s cubic-bezier(.2,.7,.2,1) forwards;
+  }
+  @keyframes rise{to{opacity:1;transform:none}}
+  .entry-head{display:flex;flex-wrap:wrap;align-items:baseline;gap:.6rem .9rem}
+  .term{
+    font-family:"Fraunces",serif;font-weight:600;font-size:1.62rem;
+    letter-spacing:-.01em;color:var(--ink);line-height:1.05;
+  }
+  .pron{font-family:"Newsreader",serif;font-style:italic;color:var(--accent);font-size:1rem}
+  .pron::before{content:"["}.pron::after{content:"]"}
+  .tag{
+    font-family:"Fraunces",serif;font-size:.66rem;letter-spacing:.12em;text-transform:uppercase;
+    padding:.2rem .55rem;border-radius:2px;color:#fff;white-space:nowrap;align-self:center;
+  }
+  .tag.t-neg{background:var(--accent)}
+  .tag.t-praw{background:var(--plum)}
+  .tag.t-biz{background:var(--teal)}
+  .tag.t-tech{background:var(--gold)}
+  .tag.t-pliki{background:var(--ink-soft)}
+  .tag.t-moje{background:#3a6ea5}
+  .tag.t-bran{background:#7a5230}
+  .projtag{
+    font-family:"Fraunces",serif;font-size:.62rem;letter-spacing:.1em;text-transform:uppercase;
+    padding:.18rem .55rem;border-radius:999px;border:1.5px solid var(--rule);
+    color:var(--ink-soft);white-space:nowrap;align-self:center;
+  }
+  .projtag::before{content:"●";color:var(--teal);margin-right:.35rem;font-size:.7em;vertical-align:middle}
+  .def{color:var(--ink)}
+  .note{
+font-size:.96rem;color:var(--accent-deep);
+    background:rgba(177,75,44,.07);border-left:3px solid var(--accent);
+    padding:.5rem .85rem;border-radius:0 3px 3px 0;
+  }
+  .note b{font-weight:600}
+  .quote{
+font-style:italic;color:var(--ink-soft);font-size:.98rem;
+    border-left:2px solid var(--rule);padding-left:.9rem;
+  }
+  .quote span{font-style:normal;font-family:"Fraunces",serif;font-size:.64rem;
+    letter-spacing:.14em;text-transform:uppercase;color:var(--ink-faint);
+    display:block;margin-bottom:.2rem}
+  .empty{padding:3rem 0;text-align:center;color:var(--ink-faint);font-style:italic}
+  /* inline-linki w definicjach + warstwa „głębiej” */
+  .deflink{color:var(--teal);text-decoration:underline;text-decoration-style:dotted;text-underline-offset:3px;cursor:pointer;transition:color .12s}
+  .deflink:hover{color:var(--accent);text-decoration-style:solid}
+  .deep-toggle{display:inline-block;margin-top:.25rem;background:none;border:none;cursor:pointer;font-family:"Fraunces",serif;font-size:.82rem;letter-spacing:.03em;color:var(--teal);padding:.15rem 0}
+  .deep-toggle:hover{color:var(--accent)}
+  .deep-body{margin-top:.45rem;padding:.7rem .95rem;background:rgba(47,107,94,.07);border-left:3px solid var(--teal);border-radius:0 4px 4px 0;color:var(--ink);font-size:.99rem;line-height:1.55}
+  .deep-body p{margin-bottom:.5rem}.deep-body p:last-child{margin-bottom:0}
+  /* przycisk powrotu z linku (drążenie) */
+  .backbtn{position:fixed;left:1.2rem;bottom:1.2rem;z-index:40;align-items:center;gap:.4rem;
+    font-family:"Fraunces",serif;font-size:.9rem;color:var(--paper);background:var(--ink);
+    border:none;border-radius:999px;padding:.6rem 1.15rem;box-shadow:0 6px 20px rgba(0,0,0,.28);cursor:pointer}
+  .backbtn:hover{background:var(--accent)}
+
+  /* ---------- Add form ---------- */
+  .addbox{margin-top:2.5rem;border:1.5px dashed var(--rule);border-radius:4px;background:rgba(251,246,236,.6)}
+  .addtoggle{
+    width:100%;text-align:left;background:none;border:none;cursor:pointer;
+    font-family:"Fraunces",serif;font-weight:600;font-size:1.05rem;color:var(--ink);
+    padding:1rem 1.2rem;display:flex;justify-content:space-between;align-items:center;
+  }
+  .addtoggle .plus{color:var(--accent);font-size:1.4rem;transition:transform .2s}
+  .addbox.open .addtoggle .plus{transform:rotate(45deg)}
+  .addbody{display:none;padding:0 1.2rem 1.3rem}
+  .addbox.open .addbody{display:block}
+  .addbody p.hint{font-size:.95rem;color:var(--ink-soft);margin-bottom:1rem;font-style:italic}
+  .field{margin-bottom:.8rem}
+  .field label{display:block;font-family:"Fraunces",serif;font-size:.74rem;letter-spacing:.06em;
+    text-transform:uppercase;color:var(--ink-soft);margin-bottom:.25rem}
+  .field input,.field textarea,.field select{
+    width:100%;padding:.55rem .7rem;border:1.5px solid var(--rule);border-radius:2px;
+    background:var(--card);font-family:"Newsreader",serif;font-size:1rem;color:var(--ink);outline:none;
+  }
+  .field input:focus,.field textarea:focus,.field select:focus{border-color:var(--accent)}
+  .field textarea{min-height:64px;resize:vertical}
+  .btn-row{display:flex;flex-wrap:wrap;gap:.6rem;margin-top:.4rem}
+  button.act{
+    font-family:"Fraunces",serif;font-weight:600;font-size:.92rem;cursor:pointer;
+    padding:.6rem 1.2rem;border-radius:2px;border:1.5px solid var(--ink);transition:all .15s;
+  }
+  button.act.primary{background:var(--ink);color:var(--paper)}
+  button.act.primary:hover{background:var(--accent);border-color:var(--accent)}
+  button.act.ghost{background:transparent;color:var(--ink)}
+  button.act.ghost:hover{background:var(--rule-soft)}
+  .toast{
+    position:fixed;left:50%;bottom:1.5rem;transform:translateX(-50%) translateY(120%);
+    background:var(--ink);color:var(--paper);padding:.7rem 1.2rem;border-radius:3px;
+    font-family:"Fraunces",serif;font-size:.9rem;z-index:30;transition:transform .35s cubic-bezier(.2,.8,.2,1);
+    box-shadow:0 8px 30px rgba(0,0,0,.25);
+  }
+  .toast.show{transform:translateX(-50%) translateY(0)}
+
+  footer{margin-top:3rem;padding-top:1.4rem;border-top:1px solid var(--rule);
+    font-size:.85rem;color:var(--ink-faint);font-style:italic;text-align:center}
+
+  @media(max-width:560px){
+    body{font-size:17px}
+    .term{font-size:1.4rem}
+  }
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <header class="masthead">
+    <div class="kicker">Ściągawka żargonu · wszystkie projekty</div>
+    <h1>Słownik <em>obcych</em> słów</h1>
+    <p class="lede">Terminy, anglicyzmy i korporacyjny żargon, które padły w naszych rozmowach — każdy wyjaśniony zwykłą polszczyzną i w tym znaczeniu, w jakim go użyliśmy. Wspólny dla wszystkich projektów; każde hasło ma znacznik, gdzie padło.</p>
+    <div class="meta-line">
+      <span><b id="totalCount">44</b> haseł</span>
+      <span><b id="projCount">1</b> <span id="projWord">projekt</span></span>
+      <span>Aktualizacja: <b>2026-06-13</b></span>
+    </div>
+  </header>
+
+  <div class="controls">
+    <div class="search-row">
+      <svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round"><circle cx="11" cy="11" r="7"/><path d="m21 21-4.3-4.3"/></svg>
+      <input id="q" type="text" placeholder="Szukaj słowa lub znaczenia…" autocomplete="off">
+    </div>
+    <div class="chips-label">Kategoria</div>
+    <div class="chips" id="chips"></div>
+    <div class="chips-label">Projekt</div>
+    <div class="chips" id="projChips"></div>
+    <div class="toolbar">
+      <button class="toggle" id="sortToggle" aria-pressed="false"><span class="ic">↕</span> <span id="sortLabel">Kolejność: tematyczna</span></button>
+      <button class="toggle" id="recentToggle" aria-pressed="false">Ostatnie dodane</button>
+      <label class="switch">
+        <input type="checkbox" id="hideMastered">
+        <span class="track"><span class="knob"></span></span>
+        <span class="switch-txt">Ukryj opanowane (★★★)</span>
+      </label>
+    </div>
+    <div class="countbar" id="countbar"></div>
+  </div>
+
+  <main id="list"></main>
+
+  <!-- ====== DODAWANIE NOWYCH SŁÓW ====== -->
+  <section class="addbox" id="addbox">
+    <button class="addtoggle" id="addToggle">
+      <span>➕ Dodaj słowo, którego nie rozumiesz</span>
+      <span class="plus">+</span>
+    </button>
+    <div class="addbody">
+      <p class="hint">Najprościej: napisz mi w rozmowie „dodaj do słowniczka: &lt;słowo&gt;" — dopiszę je na stałe do pliku.<br>
+      Albo dorzuć je tutaj sam — zapisze się w tej przeglądarce, a przyciskiem niżej skopiujesz wszystkie swoje dopiski, żeby mi je wysłać do scalenia.</p>
+      <div class="field"><label>Słowo / termin</label><input id="f-term" placeholder="np. onboarding"></div>
+      <div class="field"><label>Wymowa (jeśli angielskie) — opcjonalnie</label><input id="f-pron" placeholder="np. on-bording"></div>
+      <div class="field"><label>Kategoria</label>
+        <select id="f-cat">
+          <option value="Negocjacje">Negocjacje</option>
+          <option value="Prawo i własność">Prawo i własność</option>
+          <option value="Biznes i finanse">Biznes i finanse</option>
+          <option value="Technologia i produkt">Technologia i produkt</option>
+          <option value="Branża i operacje">Branża i operacje</option>
+          <option value="Pliki i formaty">Pliki i formaty</option>
+        </select>
+      </div>
+      <div class="field"><label>Projekt (gdzie hasło padło)</label>
+        <input id="f-proj" list="projlist" placeholder="np. Eventomat — puste = Budowlanka">
+        <datalist id="projlist"></datalist>
+      </div>
+      <div class="field"><label>Co znaczy (u nas)</label><textarea id="f-def" placeholder="Wyjaśnienie zwykłą polszczyzną…"></textarea></div>
+      <div class="field"><label>Uwaga „nie myl z…" — opcjonalnie</label><input id="f-note" placeholder="np. potocznie znaczy co innego"></div>
+      <div class="field"><label>Wyjaśnij głębiej — opcjonalnie (dla trudnych pojęć)</label><textarea id="f-deep" placeholder="Pełniejsze wyjaśnienie z analogią — pokaże się po kliknięciu „Wyjaśnij głębiej”…"></textarea></div>
+      <div class="btn-row">
+        <button class="act primary" id="f-save">Zapisz słowo</button>
+        <button class="act ghost" id="f-export">Skopiuj moje dopiski (do wysłania)</button>
+      </div>
+    </div>
+  </section>
+
+  <footer>Żywy dokument — rośnie razem z Tobą. Im więcej słów oswoisz, tym mniej żargonu nad Tobą panuje.</footer>
+</div>
+
+<div class="toast" id="toast"></div>
+<button id="backBtn" class="backbtn" style="display:none" aria-label="Wróć do poprzedniego hasła">← Wróć</button>
+
+<script>
+/* =========================================================================
+   JAK DODAĆ NOWE HASŁO RĘCZNIE (dla Claude / edytora pliku):
+   Skopiuj jeden blok poniżej i wstaw do tablicy TERMY. Pola:
+     term  — słowo (wymagane)
+     pron  — wymowa po polsku, dla angielskich słów (opcjonalne, "" jeśli brak)
+     cat   — jedna z: "Negocjacje" | "Prawo i własność" | "Biznes i finanse"
+              | "Technologia i produkt" | "Pliki i formaty"
+     def   — definicja zwykłą polszczyzną (wymagane)
+     note  — uwaga "nie myl z / potocznie" (opcjonalne, "" jeśli brak)
+     quote — jak słowo padło w naszej rozmowie (opcjonalne)
+     proj  — projekt, w którym hasło padło (opcjonalne; brak = "Budowlanka")
+   { term:"", pron:"", cat:"Negocjacje", def:"", note:"", quote:"", proj:"" },
+   ========================================================================= */
+/* UWAGA: hasła poniżej (migracja z projektu Budowlanka, 2026-06-13) nie mają pola
+   proj — kod traktuje brak proj jako "Budowlanka" (PROJ_DEFAULT). Nowe hasła z innych
+   projektów dodawaj z jawnym proj, np. proj:"Eventomat". */
+const TERMY = [
+  // ---------- NEGOCJACJE ----------
+  { term:"follow-up", pron:"fol-ap", cat:"Negocjacje", def:"Wiadomość lub działanie, które kontynuuje wcześniejszy kontakt — np. mail wysłany po spotkaniu, żeby podsumować ustalenia i podtrzymać temat.", note:"Dosłownie „pójść w ślad za czymś”. U nas najczęściej: „mail follow-up” = mail po spotkaniu.", quote:"Dziś follow-up mail (podziękowanie + rama)." },
+  { term:"term-sheet", pron:"term szit", cat:"Negocjacje", def:"Krótki, kilkupunktowy dokument spisujący najważniejsze warunki przyszłej umowy — ZANIM powstanie pełna, formalna umowa. Rodzaj szkicu zasad, zwykle jeszcze niewiążącego.", note:"", quote:"1-stronicowy term-sheet z tą strukturą." },
+  { term:"anchoring / kotwica", pron:"enkoring", cat:"Negocjacje", def:"Zasada, że pierwsza podana liczba lub warunek staje się punktem odniesienia, wokół którego kręci się reszta rozmowy. „Zakotwiczyć” = ustawić ten punkt po swojej stronie.", note:"Nie chodzi o kotwicę okrętową — to metafora „punktu, do którego wszystko się przyczepia”.", quote:"Kto pierwszy pisze dokument, ten ustawia ramę." },
+  { term:"standstill", pron:"stend-stil", cat:"Negocjacje", def:"Umowne „zawieszenie broni”: przez ustalony czas żadna strona nie robi określonej rzeczy (np. nie idzie z pomysłem do konkurencji).", note:"", quote:"Wzajemny standstill na czas testu." },
+  { term:"leverage / dźwignia", pron:"lew-eridż", cat:"Negocjacje", def:"Przewaga, która daje ci siłę przy stole — to, czym możesz „podnieść” swoją pozycję negocjacyjną.", note:"W fizyce dźwignia podnosi ciężar małą siłą; tu „podnosi” twoją pozycję.", quote:"Nie jesteś zdesperowany — to Twoja największa dźwignia." },
+  { term:"carrot / marchewka", pron:"", cat:"Negocjacje", def:"Zachęta, obietnica nagrody, która ma skłonić drugą stronę do działania (przeciwieństwo „kija”).", note:"", quote:"Marchewka: wspólna komercjalizacja, jeśli się ułoży." },
+  { term:"red flag / czerwona flaga", pron:"red fleg", cat:"Negocjacje", def:"Sygnał ostrzegawczy — coś, co powinno zapalić ci lampkę, że jest ryzyko. „Czerwona linia” = granica nie do przekroczenia.", note:"", quote:"Czerwone linie: zero BUILD-TRACK, nie deklaruj całości." },
+  { term:"scope / zakres", pron:"skoup", cat:"Negocjacje", def:"Co dokładnie wchodzi w projekt, a co nie. Pilnowanie zakresu chroni przed „rozrastaniem się” zlecenia bez dodatkowej zapłaty.", note:"", quote:"Najpierw model i IP, potem zakres i wycena." },
+  { term:"discovery", pron:"dis-kawery", cat:"Negocjacje", def:"Wstępny etap rozpoznania potrzeb klienta, zanim zacznie się właściwa budowa. „Płatne discovery” = płatne rozpoznanie.", note:"", quote:"(z pamięci) nie proponować leadom płatnego discovery." },
+  { term:"positioning / pozycjonowanie", pron:"", cat:"Negocjacje", def:"Jak ustawiasz ofertę w głowie klienta — czym ona dla niego jest i jaką wartość niesie.", note:"Nie chodzi o pozycję w Google; to „jak klient ma to postrzegać”.", quote:"Pozycjonowanie: mnożenie zysków, nie dzielenie strat." },
+  { term:"scorched earth / spalona ziemia", pron:"skorczt erth", cat:"Negocjacje", def:"Scenariusz skrajny, niszczący wszystko — tu: oddanie absolutnie wszystkiego, łącznie z silnikiem.", note:"", quote:"Spalona ziemia — nie wyceniaj liczbą, to przejęcie biznesu." },
+  { term:"total surrender / pełne poddanie", pron:"total surender", cat:"Negocjacje", def:"Całkowite oddanie kontroli — tu: pełni praw i kodu drugiej stronie.", note:"", quote:"Gdybym mu całkowicie się poddał i oddał kontrolę." },
+
+  // ---------- PRAWO I WŁASNOŚĆ ----------
+  { term:"IP / własność intelektualna", pron:"aj-pi", cat:"Prawo i własność", def:"Skrót od Intellectual Property. Prawa do rzeczy niematerialnych: kodu, dokumentacji, pomysłów, marki. „Mieć IP” = być właścicielem tych praw.", note:"", quote:"Warstwowy podział IP, nie cesja całości." },
+  { term:"NDA / umowa poufności", pron:"en-di-ej", cat:"Prawo i własność", def:"Non-Disclosure Agreement — umowa, w której strony zobowiązują się nie ujawniać poufnych informacji.", note:"", quote:"NDA — tak, oczywiste." },
+  { term:"work-for-hire", pron:"łork-for-hajer", cat:"Prawo i własność", def:"Model „dzieło na zlecenie”: wykonawca buduje, a wszystkie prawa od razu przechodzą na zlecającego. Wykonawca nie zachowuje nic.", note:"", quote:"Wprost odrzuciłeś pure work-for-hire." },
+  { term:"cesja", pron:"", cat:"Prawo i własność", def:"Prawne przeniesienie praw z jednej osoby na drugą. „Cesja praw autorskich” = oddanie ich komuś na własność, na stałe.", note:"Słowo polskie, ale prawnicze — w praktyce znaczy „oddaję ci to na zawsze”. Przeciwieństwo licencji.", quote:"Pełna cesja IP to cena wyjścia, nie wejścia." },
+  { term:"licencja", pron:"", cat:"Prawo i własność", def:"Zgoda na korzystanie z czegoś BEZ oddawania własności. Właściciel zostaje właścicielem, drugi płaci za używanie.", note:"Przeciwieństwo cesji: przy licencji NIE tracisz własności.", quote:"Silnik licencjonowany, nie sprzedany." },
+  { term:"exclusivity / wyłączność", pron:"eks-kluziwiti", cat:"Prawo i własność", def:"Prawo gwarantujące, że nikt inny (np. konkurent klienta) nie dostanie tego samego rozwiązania.", note:"", quote:"Wyłączność — wąsko i czasowo." },
+  { term:"buyout / wykup", pron:"baj-aut", cat:"Prawo i własność", def:"Odkupienie całości — tu: całego IP lub udziału — żeby druga strona miała pełną kontrolę i można się rozejść.", note:"Nie „wykup” jak w sklepie; to „odkupienie twojego udziału w przedsięwzięciu”.", quote:"Cena wykupu = cena Twojego wyjścia ze spółki." },
+  { term:"source / kod źródłowy", pron:"sors", cat:"Prawo i własność", def:"„Źródło” programu: tekst kodu, który piszą programiści i z którego powstaje działająca aplikacja. Kto ma source, może dowolnie zmieniać i rozwijać program.", note:"Potocznie „source” = źródło informacji; u nas = kod źródłowy.", quote:"Chce source i dokumentację po swojej stronie." },
+
+  // ---------- BIZNES I FINANSE ----------
+  { term:"SaaS", pron:"sas", cat:"Biznes i finanse", def:"Software as a Service — „oprogramowanie jako usługa”. Klient nie kupuje programu na własność, tylko płaci abonament za korzystanie (zwykle przez przeglądarkę).", note:"", quote:"Twój model SaaS, wdrażalny w 15–20 min." },
+  { term:"equity / udział", pron:"ekłiti", cat:"Biznes i finanse", def:"Udział we własności firmy lub spółki (np. procent udziałów, a z nim głos i zysk).", note:"", quote:"Logika udziału w spółce — wykup = odkupienie Twojego pakietu." },
+  { term:"joint venture / spółka (JV)", pron:"dżojnt wenczer", cat:"Biznes i finanse", def:"Wspólne przedsięwzięcie: dwie strony zakładają razem firmę lub projekt i dzielą własność, koszty i zyski.", note:"", quote:"Stan docelowy = wspólny produkt / spółka." },
+  { term:"ARR", pron:"ej-ar-ar", cat:"Biznes i finanse", def:"Annual Recurring Revenue — roczny powtarzalny przychód, czyli suma abonamentów w skali roku. Główna miara wartości biznesu SaaS.", note:"", quote:"SaaS wycenia się ~3–6× ARR." },
+  { term:"LTV", pron:"el-ti-wi", cat:"Biznes i finanse", def:"Lifetime Value — łączna wartość, jaką jeden klient przyniesie przez cały czas współpracy.", note:"", quote:"Lifetime value całej branży idzie w miliony." },
+  { term:"cost-plus / koszt plus", pron:"kost-plas", cat:"Biznes i finanse", def:"Sposób wyceny: koszt wytworzenia + narzut (marża) na wierzch.", note:"", quote:"Metoda 1 — koszt budowy × mnożnik." },
+  { term:"floor / podłoga", pron:"flor", cat:"Biznes i finanse", def:"Dolna granica, poniżej której nie schodzisz (np. cena minimalna).", note:"Dosłownie „podłoga” — najniższy możliwy poziom. Przeciwieństwo: „sufit / cap”.", quote:"Formuła z podłogą — nie mniej niż…" },
+  { term:"multiplier / mnożnik", pron:"maltiplajer", cat:"Biznes i finanse", def:"Liczba, przez którą mnożysz bazę, żeby uzyskać wynik (np. koszt × 3).", note:"", quote:"Mnożnik 2–4× za zrzeczenie się reużycia." },
+  { term:"de-risk / zde-ryzykować", pron:"di-risk", cat:"Biznes i finanse", def:"Zmniejszać ryzyko; zabezpieczać się na wypadek, gdyby coś poszło nie tak.", note:"", quote:"Chce zde-ryzykować swoją stronę w 100%." },
+  { term:"pilot / faza pilotażowa", pron:"", cat:"Biznes i finanse", def:"Pierwsza, mała wersja na próbę — żeby przetestować pomysł, zanim włoży się duże pieniądze.", note:"Jak „pilotażowy odcinek” serialu — próbka przed pełną serią.", quote:"Faza 1 — pilot (harmonogram z silnikiem kosztowym)." },
+  { term:"commitment", pron:"komitment", cat:"Biznes i finanse", def:"Zobowiązanie; wiążąca deklaracja zaangażowania (np. minimalna płatność co miesiąc).", note:"", quote:"Excele to naturalny commitment z jego strony." },
+  { term:"anchor-klient / klient kotwica", pron:"enczor", cat:"Biznes i finanse", def:"Kluczowy, duży klient, wokół którego budujesz resztę biznesu i którego używasz jako referencji.", note:"", quote:"Jeśli to anchor-klient na duży system…" },
+
+  // ---------- TECHNOLOGIA I PRODUKT ----------
+  { term:"engine / silnik", pron:"endżin", cat:"Technologia i produkt", def:"„Rdzeń” oprogramowania — uniwersalna część, która napędza wiele różnych aplikacji i branż.", note:"Nie silnik samochodowy; to „silnik” w sensie napędu, na którym stoi reszta.", quote:"Silnik generyczny napędza Klimatyzatron, Eventomat…" },
+  { term:"vertical / pion branżowy", pron:"wer-tikal", cat:"Technologia i produkt", def:"Konkretna branża lub rynek, pod który robisz wyspecjalizowaną wersję produktu (np. „pion budowlany”).", note:"", quote:"Reużycie pionu budowlanego idzie w miliony." },
+  { term:"dashboard / pulpit", pron:"desz-bord", cat:"Technologia i produkt", def:"Ekran zbiorczy z najważniejszymi danymi i wskaźnikami w jednym miejscu — jak deska rozdzielcza w aucie.", note:"", quote:"Makieta dashboardu zarządu (Google Stitch)." },
+  { term:"mockup / makieta", pron:"mo-kap", cat:"Technologia i produkt", def:"Niedziałający projekt graficzny ekranu — pokazuje, jak coś BĘDZIE wyglądać, zanim powstanie prawdziwa aplikacja.", note:"", quote:"To wizualizacja celu Etapu 1, nie gotowy produkt." },
+  { term:"generyczny / generic", pron:"dże-nerik", cat:"Technologia i produkt", def:"Uniwersalny, nieprzypisany do jednej branży — pasujący do wielu zastosowań.", note:"", quote:"Generyczne moduły budowlane zostają Twoje." },
+  { term:"sanity check / kontrola rozsądku", pron:"seniti czek", cat:"Technologia i produkt", def:"Szybkie sprawdzenie, czy wynik w ogóle ma sens, zanim się na nim oprzesz.", note:"", quote:"Logika SaaS jako kontrola zdrowia rozsądku." },
+
+  // ---------- PLIKI I FORMATY ----------
+  { term:"timestamp / znacznik czasu", pron:"tajm-stamp", cat:"Pliki i formaty", def:"Etykieta czasu mówiąca „w której minucie/sekundzie” coś się dzieje.", note:"", quote:"SRT ma timestampy, TXT nie." },
+  { term:"TXT", pron:"", cat:"Pliki i formaty", def:"Zwykły plik tekstowy — sam tekst, bez formatowania.", note:"", quote:"Wyślij TXT — najczystszy do czytania." },
+  { term:"SRT", pron:"", cat:"Pliki i formaty", def:"Plik z napisami: tekst plus znaczniki czasu, kiedy każda kwestia pada.", note:"", quote:"SRT, bo ma timestampy." },
+  { term:"CSV", pron:"", cat:"Pliki i formaty", def:"Tabela zapisana jako tekst (wartości oddzielone przecinkami); otwiera się w Excelu.", note:"", quote:"Mogę wysłać plik SRT, TXT lub CSV." },
+  { term:"m4a", pron:"", cat:"Pliki i formaty", def:"Plik dźwiękowy (nagranie audio).", note:"", quote:"Audio m4a sobie odpuść." },
+  { term:"HTML", pron:"ha-te-em-el", cat:"Pliki i formaty", def:"Język, w którym tworzy się strony internetowe. Ten słowniczek to plik HTML — otwierasz go w przeglądarce.", note:"", quote:"Wygeneruj plik HTML ze ściągawką terminów." },
+
+  // ===================================================================
+  // DODANE PREWENCYJNIE — terminy, które na pewno pojawią się w naszych
+  // rozmowach o umowie, spółce i budowie systemu (2026-06-13).
+  // ===================================================================
+
+  // ---------- NEGOCJACJE (zapas) ----------
+  { term:"milestone / kamień milowy", pron:"majlstoun", cat:"Negocjacje", def:"Punkt kontrolny w projekcie (np. „po module 1”), często powiązany z płatnością albo z decyzją „idziemy dalej czy nie”.", note:"", quote:"" },
+  { term:"deliverable / rezultat do oddania", pron:"deliwerebl", cat:"Negocjacje", def:"Konkretna rzecz, którą masz dostarczyć: dokument, działający moduł, makieta. To, co da się jednoznacznie „odhaczyć”.", note:"", quote:"" },
+  { term:"scope creep / pełzanie zakresu", pron:"skoup krip", cat:"Negocjacje", def:"Niekontrolowane rozrastanie się projektu o kolejne „a dorzuć jeszcze…”, bez zmiany ceny i terminu.", note:"Główna pułapka przy zleceniach — dlatego pilnuje się zakresu (scope).", quote:"" },
+  { term:"deadline / nieprzekraczalny termin", pron:"dedlajn", cat:"Negocjacje", def:"Data, do której coś musi być gotowe.", note:"", quote:"" },
+  { term:"ballpark / orientacyjnie, z grubsza", pron:"bolpark", cat:"Negocjacje", def:"Przybliżona liczba „w okolicach”, podana bez zobowiązania.", note:"Dosłownie „boisko” — chodzi o „mniej więcej w tym rejonie”, nie dokładną cenę.", quote:"" },
+  { term:"counteroffer / kontroferta", pron:"kaunter-ofer", cat:"Negocjacje", def:"Odpowiedź na czyjąś propozycję z innymi (zwykle korzystniejszymi dla ciebie) warunkami.", note:"", quote:"" },
+  { term:"win-win", pron:"łin-łin", cat:"Negocjacje", def:"Układ, w którym obie strony wychodzą zadowolone — a nie jedna kosztem drugiej.", note:"", quote:"" },
+  { term:"walk away / odejść od stołu", pron:"łok-ełej", cat:"Negocjacje", def:"Gotowość zrezygnowania z umowy. Paradoksalnie zwiększa twoją siłę: kto naprawdę może odejść, ten dyktuje warunki.", note:"", quote:"" },
+  { term:"BATNA", pron:"batna", cat:"Negocjacje", def:"Twój „plan B”: najlepsze, co możesz zrobić, jeśli ta konkretna umowa NIE dojdzie do skutku. Im lepsza BATNA, tym mocniej negocjujesz.", note:"Skrót ang. „najlepsza alternatywa dla negocjowanego porozumienia”.", quote:"" },
+  { term:"concession / ustępstwo", pron:"konseszn", cat:"Negocjacje", def:"Rezygnacja z części swoich żądań, żeby pchnąć rozmowę do przodu.", note:"", quote:"" },
+  { term:"due diligence / prześwietlenie", pron:"dju dilidżens", cat:"Negocjacje", def:"Dokładne sprawdzenie drugiej strony lub przedmiotu (firmy, kodu, dokumentów) przed podpisaniem umowy.", note:"", quote:"" },
+  { term:"LOI / list intencyjny", pron:"el-o-aj", cat:"Negocjacje", def:"Letter of Intent — wstępna, zwykle niewiążąca deklaracja „chcemy to zrobić razem”, spisana przed właściwą umową.", note:"Kuzyn term-sheetu: term-sheet to warunki, LOI to deklaracja chęci.", quote:"" },
+
+  // ---------- PRAWO I WŁASNOŚĆ (zapas) ----------
+  { term:"escrow / depozyt powierniczy", pron:"eskroł", cat:"Prawo i własność", def:"Pieniądze lub kod złożone u zaufanej trzeciej strony i wydawane dopiero po spełnieniu warunku. Zabezpiecza obie strony naraz.", note:"", quote:"" },
+  { term:"source code escrow / depozyt kodu", pron:"sors koud eskroł", cat:"Prawo i własność", def:"Kod oddany do depozytu u niezależnego podmiotu i wydawany klientowi tylko w sytuacji awaryjnej (np. gdy wykonawca zniknie albo zbankrutuje).", note:"Realny most między „chcę mieć source” a „nie oddaję kodu” — klient ma bezpiecznik, ty zachowujesz własność.", quote:"" },
+  { term:"royalty / tantiema", pron:"rojalti", cat:"Prawo i własność", def:"Procent od przychodu lub stała opłata płacona właścicielowi IP za korzystanie z jego rozwiązania.", note:"", quote:"" },
+  { term:"liability / odpowiedzialność", pron:"lajabiliti", cat:"Prawo i własność", def:"Za co i do jakiej kwoty odpowiadasz, jeśli coś pójdzie nie tak. W umowach zwykle się ją ogranicza („limit odpowiedzialności”).", note:"", quote:"" },
+  { term:"warranty / rękojmia, gwarancja", pron:"łoranti", cat:"Prawo i własność", def:"Zobowiązanie, że produkt działa jak obiecano przez określony czas; jeśli nie — poprawiasz na swój koszt.", note:"", quote:"" },
+  { term:"non-compete / zakaz konkurencji", pron:"non-kompit", cat:"Prawo i własność", def:"Zapis, że przez jakiś czas nie zrobisz tego samego dla konkurencji drugiej strony.", note:"Uważaj — zbyt szeroki zakaz konkurencji zabija Twój model reużycia silnika.", quote:"" },
+  { term:"termination clause / klauzula wypowiedzenia", pron:"termineiszn", cat:"Prawo i własność", def:"Zapis mówiący, kto, kiedy i na jakich zasadach może zakończyć umowę.", note:"", quote:"" },
+  { term:"wyłączna vs niewyłączna (licencja)", pron:"", cat:"Prawo i własność", def:"Wyłączna: tylko jeden klient może z tego korzystać. Niewyłączna: możesz to samo dać też innym.", note:"To serce sporu o „projekt niepowielany” — wyłączność można zawęzić do jego rynku zamiast oddawać globalnie.", quote:"" },
+  { term:"background IP / własność wcześniejsza", pron:"bekgrałnd aj-pi", cat:"Prawo i własność", def:"Frameworki, biblioteki i silnik, które wykonawca przyniósł ze sobą do projektu (powstały wcześniej lub niezależnie). Zostają jego własnością; klient dostaje licencję na korzystanie z nich w ramach aplikacji.", note:"To dzięki temu pojęciu silnik może zostać Twój, mimo że „oddajesz aplikację”. Standard branżowy.", quote:"" },
+  { term:"foreground IP / własność nowa", pron:"forgrałnd aj-pi", cat:"Prawo i własność", def:"To, co zbudowano specjalnie dla danego klienta w ramach projektu. Tu klient zwykle może dostać pełne prawa.", note:"Przeciwieństwo background IP — razem tworzą standardowy podział praw w umowach IT.", quote:"" },
+  { term:"source code license / licencja na kod", pron:"sors koud lajsens", cat:"Prawo i własność", def:"Prawo do oglądania, uruchamiania i modyfikowania kodu — bez przejęcia własności frameworka/silnika pod spodem.", note:"Co innego niż cesja (pełna własność) i niż escrow (kod w depozycie awaryjnym).", quote:"" },
+
+  // ---------- BIZNES I FINANSE (zapas) ----------
+  { term:"MRR / miesięczny przychód powtarzalny", pron:"em-er-er", cat:"Biznes i finanse", def:"Suma abonamentów wpływających co miesiąc. Młodszy brat ARR (tego rocznego).", note:"", quote:"" },
+  { term:"churn / odpływ klientów", pron:"czern", cat:"Biznes i finanse", def:"Odsetek klientów, którzy rezygnują z abonamentu w danym okresie. Główny wróg każdego biznesu SaaS.", note:"", quote:"" },
+  { term:"retainer / abonament za gotowość", pron:"riteiner", cat:"Biznes i finanse", def:"Stała miesięczna kwota za to, że jesteś dostępny i obsługujesz (utrzymanie, drobne zmiany), niezależnie od bieżących zleceń.", note:"", quote:"" },
+  { term:"upfront / z góry", pron:"apfront", cat:"Biznes i finanse", def:"Płatność „z przodu”, przed rozpoczęciem prac.", note:"Przeciwieństwo „po wykonaniu / z dołu”.", quote:"" },
+  { term:"cap / sufit", pron:"kap", cat:"Biznes i finanse", def:"Górna granica — np. maksymalna cena albo maksymalna odpowiedzialność.", note:"Para do „floor / podłoga”: floor to dół, cap to góra.", quote:"" },
+  { term:"valuation / wycena firmy", pron:"waluejszn", cat:"Biznes i finanse", def:"Ile dana firma, projekt albo udział jest wart w pieniądzu.", note:"", quote:"" },
+  { term:"vesting / nabywanie udziałów w czasie", pron:"westing", cat:"Biznes i finanse", def:"Mechanizm, w którym udziały wspólnika „odblokowują się” stopniowo (np. przez 4 lata), więc ktoś, kto odejdzie wcześnie, nie zabiera całości.", note:"Ważne przy zakładaniu spółki — chroni obie strony przed „wziął udziały i zniknął”.", quote:"" },
+  { term:"cap table / tabela udziałowców", pron:"kap tejbl", cat:"Biznes i finanse", def:"Spis, kto i ile ma udziałów w spółce.", note:"", quote:"" },
+  { term:"ROI / zwrot z inwestycji", pron:"er-o-aj", cat:"Biznes i finanse", def:"Ile zarabiasz w stosunku do tego, ile włożyłeś.", note:"Mocny argument sprzedażowy: „ten system zwróci się w X miesięcy”.", quote:"" },
+  { term:"TCO / całkowity koszt posiadania", pron:"te-ce-o", cat:"Biznes i finanse", def:"Pełny koszt rozwiązania przez lata: nie tylko zakup, ale utrzymanie, aktualizacje i obsługa.", note:"", quote:"" },
+  { term:"unit economics / ekonomia jednostkowa", pron:"junit ekonomiks", cat:"Biznes i finanse", def:"Czy zarabiasz na pojedynczym kliencie lub transakcji, po odjęciu kosztów jego obsługi.", note:"", quote:"" },
+  { term:"bootstrapping / rozwój z własnych środków", pron:"butstraping", cat:"Biznes i finanse", def:"Budowanie firmy bez inwestora zewnętrznego — z własnych pieniędzy i bieżących przychodów.", note:"", quote:"" },
+
+  // ---------- TECHNOLOGIA I PRODUKT (zapas) ----------
+  { term:"MVP / minimalny działający produkt", pron:"em-fał-pi", cat:"Technologia i produkt", def:"Najprostsza wersja produktu, która już daje realną wartość i którą można pokazać albo sprzedać.", note:"To dokładnie idea „cienkiego plastra” / Etapu 1, o której rozmawialiśmy.", quote:"" },
+  { term:"backend / zaplecze", pron:"bekend", cat:"Technologia i produkt", def:"Część niewidoczna programu: serwer, baza danych, logika. „To, co pod maską”.", note:"", quote:"" },
+  { term:"frontend / interfejs", pron:"frontend", cat:"Technologia i produkt", def:"Część widoczna, z którą rozmawia użytkownik: ekrany, przyciski, formularze.", note:"", quote:"" },
+  { term:"API / łącznik między programami", pron:"a-pi", cat:"Technologia i produkt", def:"Sposób, w jaki dwa programy „rozmawiają” i wymieniają dane — np. system budowy gada z programem księgowym.", note:"", quote:"" },
+  { term:"cloud / chmura", pron:"klałd", cat:"Technologia i produkt", def:"Aplikacja i dane na zdalnych serwerach, dostępne przez internet, zamiast na własnym komputerze.", note:"", quote:"" },
+  { term:"on-premise / lokalnie, „u siebie”", pron:"on-premis", cat:"Technologia i produkt", def:"Odwrotność chmury: oprogramowanie działa na serwerze klienta, w jego własnej firmie.", note:"", quote:"" },
+  { term:"deployment / wdrożenie", pron:"diploiment", cat:"Technologia i produkt", def:"Uruchomienie aplikacji „na produkcji”, tak by realni użytkownicy mogli z niej korzystać.", note:"Co innego niż onboarding: deployment to technika, onboarding to ludzie.", quote:"" },
+  { term:"roadmap / mapa drogowa", pron:"roudmap", cat:"Technologia i produkt", def:"Plan rozwoju produktu w czasie: co i mniej więcej kiedy powstanie.", note:"", quote:"" },
+  { term:"onboarding / wdrożenie użytkownika", pron:"onbording", cat:"Technologia i produkt", def:"Proces wprowadzenia nowego użytkownika lub klienta, żeby szybko i bezboleśnie zaczął korzystać z systemu.", note:"", quote:"" },
+  { term:"integration / integracja", pron:"integrejszn", cat:"Technologia i produkt", def:"Połączenie twojego systemu z innym — np. z programem księgowym, bankiem, kalendarzem czy e-mailem.", note:"", quote:"" },
+  { term:"scalability / skalowalność", pron:"skejlabiliti", cat:"Technologia i produkt", def:"Zdolność systemu do obsłużenia coraz większej liczby użytkowników lub budów bez przebudowy od zera.", note:"", quote:"" },
+  { term:"SLA / gwarantowany poziom usługi", pron:"es-el-a", cat:"Technologia i produkt", def:"Service Level Agreement — umowa, w której obiecujesz konkretne parametry: np. „dostępność 99%”, „naprawa awarii w 24 h”.", note:"", quote:"" },
+  { term:"repo / repozytorium", pron:"repo", cat:"Technologia i produkt", def:"Magazyn kodu z pełną historią zmian (np. GitHub). „Miejsce, gdzie mieszka i wersjonuje się kod”.", note:"", quote:"" },
+  { term:"bug / błąd", pron:"bag", cat:"Technologia i produkt", def:"Usterka w działaniu programu — coś działa inaczej, niż powinno.", note:"", quote:"" },
+  { term:"feature / funkcja", pron:"ficzer", cat:"Technologia i produkt", def:"Konkretna możliwość programu — np. „raport głosem” albo „powiadomienie o poślizgu”.", note:"", quote:"" },
+  { term:"UX / UI", pron:"ju-eks / ju-aj", cat:"Technologia i produkt", def:"UX = jak wygodnie się z czegoś korzysta (doświadczenie użytkownika). UI = jak to wygląda (interfejs).", note:"", quote:"" },
+  { term:"prototype / prototyp", pron:"prototajp", cat:"Technologia i produkt", def:"Wczesna, próbna wersja pokazująca pomysł — więcej niż makieta, mniej niż gotowy produkt.", note:"", quote:"" },
+  { term:"hosting", pron:"hosting", cat:"Technologia i produkt", def:"Usługa „mieszkania” aplikacji na serwerze, dzięki której jest dostępna w internecie.", note:"", quote:"" },
+
+  // ===================================================================
+  // EVENTOMAT (migracja 2026-06-13) — żargon eventowo-hotelowo-gastro,
+  // finansowy i techniczny z dokumentacji i 3 serii pytań do Dominiki Jordan.
+  // ===================================================================
+
+  // ---------- BRANŻA I OPERACJE (events / hotel / gastronomia) ----------
+  { term:"event", pron:"iwent", cat:"Branża i operacje", def:"Każde organizowane wydarzenie: wesele, komunia, chrzciny, bankiet firmowy, konferencja, jubileusz. Podstawowa „jednostka pracy” w systemie.", note:"", quote:"Około 110 eventów rocznie.", proj:"Eventomat" },
+  { term:"BEO", pron:"bi-i-oł", cat:"Branża i operacje", def:"Banquet Event Order — cyfrowa karta realizacji wydarzenia: timeline, kto co robi, alergie, zmiany. Zastępuje papierowe instrukcje dla sali, kuchni, recepcji i housekeepingu w dniu eventu.", note:"U nas „BEO Live” = ta karta na tablecie w dniu wesela.", quote:"BEO Live zastępuje papierowe instrukcje dla sali, kuchni, recepcji.", proj:"Eventomat" },
+  { term:"room block / blok pokoi", pron:"rum blok", cat:"Branża i operacje", def:"Grupa pokoi zablokowana lub zarezerwowana dla jednego konkretnego eventu (np. pula noclegów dla gości weselnych).", note:"", quote:"Blokujecie pokoje przed podpisaniem umowy? → tak.", proj:"Eventomat" },
+  { term:"rooming list", pron:"ruming list", cat:"Branża i operacje", def:"Lista gości nocujących z przypisaniem do pokoi lub typów pokoi w ramach room block.", note:"", quote:"Kto zbiera rooming list? → recepcja hotelowa.", proj:"Eventomat" },
+  { term:"pickup", pron:"pik-ap", cat:"Branża i operacje", def:"Stopień wykorzystania zablokowanej puli pokoi — jaki % zarezerwowanego bloku faktycznie się wypełnił. Zwykle w procentach.", note:"Tu nie „odbiór” — to miara wypełnienia bloku pokoi.", quote:"Chcecie mierzyć pickup? → tak.", proj:"Eventomat" },
+  { term:"release date", pron:"ri-lis dejt", cat:"Branża i operacje", def:"Data, po której niewykupione pokoje z bloku wracają do ogólnej sprzedaży.", note:"", quote:"Czy istnieje release date? → nie.", proj:"Eventomat" },
+  { term:"housekeeping", pron:"hauskiping", cat:"Branża i operacje", def:"Dział hotelowy odpowiedzialny za sprzątanie i przygotowanie pokoi.", note:"", quote:"Jak housekeeping dowiaduje się, które pokoje przygotować wcześniej?", proj:"Eventomat" },
+  { term:"PMS", pron:"pi-em-es", cat:"Branża i operacje", def:"Property Management System — program hotelowy do zarządzania pokojami, rezerwacjami, gośćmi i obłożeniem.", note:"U Jordaszki PMS to „CHART”.", quote:"Używacie PMS hotelowego? → CHART.", proj:"Eventomat" },
+  { term:"POS", pron:"pi-o-es", cat:"Branża i operacje", def:"Point of Sale — system sprzedaży gastronomicznej, barowej lub restauracyjnej (kasa + rozliczenia).", note:"", quote:"POS w restauracji (luka do uzupełnienia).", proj:"Eventomat" },
+  { term:"typy pokoi / room types", pron:"rum tajps", cat:"Branża i operacje", def:"Kategorie pokoi w hotelu (standard, superior, apartament…), różniące się ceną i standardem.", note:"", quote:"Typy pokoi? → standard.", proj:"Eventomat" },
+  { term:"welcome pack", pron:"łelkam pak", cat:"Branża i operacje", def:"Powitalny zestaw dla gości (drobiazgi, woda, słodycze w pokoju) na początek pobytu.", note:"", quote:"Specjalne śniadania albo welcome pack? → nie.", proj:"Eventomat" },
+  { term:"open bar", pron:"ołpen bar", cat:"Branża i operacje", def:"Bar, w którym napoje i alkohol są wliczone w cenę — goście nie płacą za każdy drink osobno.", note:"", quote:"Jak rozliczane są napoje i open bar?", proj:"Eventomat" },
+  { term:"korkowe", pron:"", cat:"Branża i operacje", def:"Opłata pobierana przez lokal, gdy klient przynosi własny alkohol (rekompensata za obsługę).", note:"Polskie branżowe. Jordaszka korkowego NIE pobiera — element „brak ukrytych opłat”.", quote:"Korkowego nie pobieracie.", proj:"Eventomat" },
+  { term:"wedding planner", pron:"łeding planer", cat:"Branża i operacje", def:"Osoba planująca i koordynująca wesele — od koncepcji, przez atrakcje, po usadzenie gości.", note:"", quote:"Menager pełni rolę wedding plannera.", proj:"Eventomat" },
+  { term:"change request / zgłoszenie zmiany", pron:"czejndż rikłest", cat:"Branża i operacje", def:"Kontrolowana zmiana zakresu eventu: liczba gości, menu, pokoje, dekoracje, czas, alkohol, obsługa.", note:"", quote:"Kontrolowana zmiana zakresu eventu.", proj:"Eventomat" },
+  { term:"audit log / dziennik zmian", pron:"odit log", cat:"Branża i operacje", def:"Historia istotnych zmian: kto, kiedy, co zmienił oraz jaki był stan przed i po zmianie.", note:"", quote:"Historia istotnych zmian: kto, kiedy, co zmienił.", proj:"Eventomat" },
+
+  // ---------- BIZNES I FINANSE (z Eventomatu) ----------
+  { term:"godziwa marża", pron:"", cat:"Biznes i finanse", def:"Minimalny poziom zarobku, który uzasadnia przyjęcie eventu po uwzględnieniu kosztów, pracy, ryzyka i zasobów obiektu.", note:"U Jordaszki: min. 30%, wesela 40%, hotel 30%, blokada oferty poniżej 20%.", quote:"Minimalna marża godziwa? → 30%.", proj:"Eventomat" },
+  { term:"financial guardrails", pron:"fajnenszl gardrejls", cat:"Biznes i finanse", def:"Warstwa reguł pilnująca budżetu, kosztów, rabatów i marży — wykrywa ryzyko zanim firma straci zysk albo klient dostanie niespodziewaną dopłatę.", note:"Dosł. „bariery ochronne”, jak barierki na drodze.", quote:"Warstwa reguł pilnująca godziwej marży.", proj:"Eventomat" },
+  { term:"client price notice", pron:"klajent prajs notis", cat:"Biznes i finanse", def:"Formalna informacja do klienta o zmianie ceny (zmiana zakresu, wzrost kosztów, dodatkowa usługa). Powinna wymagać akceptacji klienta.", note:"", quote:"Powinna wymagać akceptacji klienta, jeśli zmienia warunki finansowe.", proj:"Eventomat" },
+  { term:"food cost", pron:"fud kost", cat:"Biznes i finanse", def:"Koszt składników wyrażony jako % ceny dania lub menu — kluczowy wskaźnik rentowności kuchni.", note:"", quote:"Liczyć osobno food cost? → tak.", proj:"Eventomat" },
+  { term:"pipeline", pron:"pajplajn", cat:"Biznes i finanse", def:"„Lejek” / kolejka eventów na różnych etapach — od zapytania, przez ofertę, po podpisaną umowę. Pokazuje, co się szykuje.", note:"", quote:"Pipeline eventów (raport w dashboardzie).", proj:"Eventomat" },
+  { term:"lead", pron:"lid", cat:"Biznes i finanse", def:"Potencjalny klient, który wykazał zainteresowanie (zapytanie o termin, ofertę). Wejście do pipeline’u sprzedaży.", note:"", quote:"Leady, pipeline, karta eventu, sale, statusy.", proj:"Eventomat" },
+  { term:"P&L", pron:"pi-end-el", cat:"Biznes i finanse", def:"Profit & Loss — rachunek zysków i strat: ile zarobiono po odjęciu wszystkich kosztów.", note:"", quote:"Pokoje poza per-event P&L (rozliczane miesięcznie).", proj:"Eventomat" },
+  { term:"konwersja / conversion rate", pron:"konwersja", cat:"Biznes i finanse", def:"% zapytań lub wysłanych ofert, które kończą się podpisaniem umowy. Miara skuteczności sprzedaży.", note:"", quote:"Skuteczność ofert — ile % kończy się podpisaniem umowy.", proj:"Eventomat" },
+  { term:"klient referencyjny", pron:"", cat:"Biznes i finanse", def:"Klient, który zgadza się być pokazywany innym: demo u siebie, case study, rekomendacje.", note:"", quote:"Czy zgodzicie się być klientem referencyjnym? → tak.", proj:"Eventomat" },
+  { term:"owner-operator", pron:"ołner-operejtor", cat:"Biznes i finanse", def:"Model, w którym właściciel sam prowadzi codzienne operacje i nie deleguje ról — wszystko „na nim”.", note:"U Jordaszki tak właśnie jest → macierz ról startuje od właścicieli.", quote:"Model owner-operator, brak delegacji ról.", proj:"Eventomat" },
+  { term:"multi-property", pron:"malti-property", cat:"Biznes i finanse", def:"Obsługa wielu obiektów/lokalizacji w jednym systemie.", note:"", quote:"Tylko 1 obiekt → multi-property OUT OF MVP.", proj:"Eventomat" },
+
+  // ---------- TECHNOLOGIA I PRODUKT (z Eventomatu) ----------
+  { term:"self-service", pron:"self-serwis", cat:"Technologia i produkt", def:"Funkcje, które klient zmienia sam, bez dzwonienia do dostawcy — np. ceny, menu, szablony dokumentów.", note:"", quote:"Ustawienia self-service: cena, menu, szablony.", proj:"Eventomat" },
+  { term:"tenant / multi-tenant", pron:"tenant", cat:"Technologia i produkt", def:"Jeden klient (firma) w systemie SaaS obsługującym wielu klientów naraz na wspólnej platformie, z odseparowanymi danymi.", note:"Stąd „multi-tenant” = wielu najemców jednej aplikacji.", quote:"tenants/jordaszka/logo.png", proj:"Eventomat" },
+  { term:"realtime / czas rzeczywisty", pron:"rial-tajm", cat:"Technologia i produkt", def:"Dane aktualizują się natychmiast u wszystkich użytkowników, bez odświeżania strony.", note:"", quote:"Z tych samych danych, w czasie rzeczywistym.", proj:"Eventomat" },
+  { term:"offline-first", pron:"oflajn-ferst", cat:"Technologia i produkt", def:"Aplikacja działa też bez internetu, a po powrocie sieci sama synchronizuje dane.", note:"Ważne przy słabym WiFi w parku 3,5 ha u Jordaszki.", quote:"Offline-first dla zadań → sync przy powrocie do sieci.", proj:"Eventomat" },
+  { term:"PWA", pron:"pi-dabl-ju-ej", cat:"Technologia i produkt", def:"Progressive Web App — strona działająca jak aplikacja na telefonie/tablecie, bez instalacji ze sklepu.", note:"", quote:"Wersja mobilna (PWA) — praca na tablecie i telefonie.", proj:"Eventomat" },
+  { term:"RLS", pron:"er-el-es", cat:"Technologia i produkt", def:"Row-Level Security — zabezpieczenie bazy danych: każdy użytkownik widzi tylko te wiersze, do których ma prawo.", note:"", quote:"Supabase (Postgres + Auth + Realtime + RLS).", deep:"W zwykłej bazie to aplikacja decyduje, kto co widzi — a jeśli w kodzie jest błąd, ktoś może zobaczyć cudze dane. RLS przenosi tę decyzję do samej bazy: każdy wiersz „wie”, do kogo należy, i baza z urzędu pokazuje użytkownikowi tylko jego wiersze — nawet gdyby aplikacja przez pomyłkę poprosiła o wszystko. To jak ochroniarz przy każdej półce, nie tylko przy wejściu do sklepu. Dlatego RLS jest filarem bezpiecznego multi-tenant: separacja klientów pilnowana jest najniżej, jak się da.", proj:"Eventomat" },
+  { term:"Supabase", pron:"supabejs", cat:"Technologia i produkt", def:"Gotowe zaplecze aplikacji w chmurze (baza danych, logowanie, realtime, pliki) — przyspiesza budowę, bo nie trzeba pisać serwera od zera.", note:"", quote:"Backend: Supabase (Postgres + Auth + Realtime + Storage).", proj:"Eventomat" },
+  { term:"ORM", pron:"o-er-em", cat:"Technologia i produkt", def:"Warstwa tłumacząca kod aplikacji na zapytania do bazy danych — pozwala pracować na danych bez ręcznego pisania SQL.", note:"W projekcie: Drizzle ORM.", quote:"Supabase + Drizzle ORM.", deep:"Baza mówi w SQL, aplikacja w JavaScript — ORM to tłumacz między nimi. Zamiast ręcznie sklejać teksty zapytań SQL (łatwo o błąd i o lukę bezpieczeństwa), piszesz w swoim języku „daj mi pracowników z działu X”, a ORM zamienia to na poprawny SQL i oddaje gotowe obiekty. Zaleta: mniej błędów, czytelniejszy kod, podpowiedzi edytora. Cena: dodatkowa warstwa pośrednia, którą trzeba rozumieć, i czasem mniejsza kontrola nad dokładnym kształtem zapytania.", proj:"Eventomat" },
+  { term:"mock-data / dane przykładowe", pron:"mok-dejta", cat:"Technologia i produkt", def:"Zmyślone dane pokazowe w prototypie/makiecie, zanim podłączy się prawdziwe.", note:"", quote:"Średnie wesele 120 osób — mock-data już match.", proj:"Eventomat" },
+  { term:"parallel run / praca równoległa", pron:"par:alel ran", cat:"Technologia i produkt", def:"Używanie nowego systemu obok starego jednocześnie, na próbę, zanim się w pełni przesiądzie.", note:"Jordaszka tego NIE chce — woli od razu pełny pilot na prawdziwym evencie.", quote:"Format pilota? Prawdziwy event — nie parallel run.", proj:"Eventomat" },
+  { term:"out of scope / poza zakresem", pron:"aut-of-skoup", cat:"Technologia i produkt", def:"Coś świadomie wyłączone z bieżącego etapu prac (np. z MVP) — nie robimy tego teraz.", note:"", quote:"Garmażerka online — OUT OF SCOPE MVP.", proj:"Eventomat" },
+  { term:"key visual", pron:"ki-wiżual", cat:"Technologia i produkt", def:"Główny motyw graficzny marki — spójny obraz powtarzany w materiałach (obok logo).", note:"", quote:"Branding? → logo + key visual.", proj:"Eventomat" },
+  { term:"case study / studium przypadku", pron:"kejs-stadi", cat:"Technologia i produkt", def:"Opisany przykład wdrożenia u konkretnego klienta, używany jako dowód skuteczności w sprzedaży.", note:"", quote:"Mogę używać Was w case study.", proj:"Eventomat" },
+  { term:"Loom", pron:"lum", cat:"Technologia i produkt", def:"Narzędzie do nagrywania krótkich filmów z ekranu zamiast pisania długich opisów.", note:"", quote:"Mogę nagrywać krótkie wideo (Loom, ~2 min) zamiast pisać.", proj:"Eventomat" },
+
+  // ===================================================================
+  // ONA 360 (migracja 2026-06-13) — żargon badania 360°, stacku React/
+  // Firebase, bezpieczeństwa danych (RODO) i prawa autorskiego z projektu
+  // oceny pracowników dla klienta (badanie 360°).
+  // ===================================================================
+
+  // ---------- TECHNOLOGIA I PRODUKT (metodologia 360°) ----------
+  { term:"ONA / Organizational Network Analysis", pron:"o-en-a", cat:"Technologia i produkt", def:"Analiza sieci powiązań w firmie: kto z kim realnie współpracuje, kto jest centralnym punktem zespołu, a kto na uboczu. To metoda stojąca za nazwą całego projektu.", note:"Stąd nazwa „ONA 360”. Niezależna instancja nazywa się OSA — Ocena Sieci Organizacyjnej.", quote:"Mapa sieci powiązań (react-force-graph).", proj:"ONA 360" },
+  { term:"badanie 360° / feedback 360", pron:"trzysta sześćdziesiąt stopni", cat:"Technologia i produkt", def:"Ocena pracownika ze wszystkich stron naraz — koledzy z zespołu oceniają się nawzajem, a nie tylko szef ocenia podwładnego. „Pełny okrąg” opinii.", note:"", quote:"Badanie 360° = pracownicy oceniają siebie nawzajem anonimowo.", proj:"ONA 360" },
+  { term:"rater / oceniający", pron:"rejter", cat:"Technologia i produkt", def:"Osoba, która w badaniu wystawia ocenę innemu pracownikowi. W ONA jego tożsamość jest ukrywana (hashowana), żeby oceny były anonimowe.", note:"", quote:"raterId = SHA-256(raterUID + salt).", proj:"ONA 360" },
+  { term:"wektor (oceny)", pron:"", cat:"Technologia i produkt", def:"Jeden wymiar, w którym ocenia się pracownika. W ONA jest ich pięć (np. atmosfera, odpowiedzialność, komunikacja, dojrzałość, zaufanie).", note:"Nie wektor z matematyki — tu po prostu „oś oceny”.", quote:"5 wektorów, 6 koszyków, 3 modele scoringu.", proj:"ONA 360" },
+  { term:"scoring / punktacja", pron:"skoring", cat:"Technologia i produkt", def:"Przeliczanie surowych odpowiedzi z ankiety na liczbowy wynik według ustalonego modelu (w ONA są trzy modele liczenia).", note:"", quote:"3 modele punktacji: absolute, scientific, hybrid.", proj:"ONA 360" },
+  { term:"talent matrix / siatka talentów", pron:"talent mejtriks", cat:"Technologia i produkt", def:"Wykres rozkładający pracowników na dwóch osiach (np. potencjał vs ryzyko), żeby jednym rzutem oka zobaczyć, kto jest gdzie.", note:"", quote:"Admin widzi wyniki: siatka talentów, mapa sieci, analiza ryzyka.", proj:"ONA 360" },
+  { term:"network map / mapa sieci", pron:"netłork map", cat:"Technologia i produkt", def:"Graficzna mapa powiązań między ludźmi — kropki to pracownicy, linie to relacje/oceny między nimi.", note:"", quote:"D3 + react-force-graph-2d — mapa sieci powiązań.", proj:"ONA 360" },
+  { term:"React", pron:"riakt", cat:"Technologia i produkt", def:"Popularna biblioteka do budowania interfejsów stron i aplikacji (ekrany złożone z „komponentów”). Na niej stoją obie aplikacje ONA.", note:"", quote:"Stack: React 19 + Vite + Tailwind.", proj:"ONA 360" },
+  { term:"Vite", pron:"wit", cat:"Technologia i produkt", def:"Narzędzie, które uruchamia aplikację u programisty i pakuje ją do wersji produkcyjnej. „Warsztat”, w którym powstaje gotowa strona.", note:"Franc. „szybko”.", quote:"npm run dev → localhost:5173.", proj:"ONA 360" },
+  { term:"Tailwind", pron:"tejlłind", cat:"Technologia i produkt", def:"Sposób stylowania wyglądu przez gotowe, drobne klasy CSS wpisywane wprost w kodzie ekranu (kolory, odstępy, czcionki).", note:"", quote:"React 19 + Vite + Tailwind v4.", proj:"ONA 360" },
+  { term:"Zustand", pron:"cu-sztand", cat:"Technologia i produkt", def:"Biblioteka trzymająca „wspólny stan” aplikacji — dane, z których korzysta wiele ekranów naraz (np. lista pracowników, zalogowany admin).", note:"Niem. „stan”.", quote:"zustand — state management (useAdminStore.js).", proj:"ONA 360" },
+  { term:"Firebase", pron:"fajer-bejs", cat:"Technologia i produkt", def:"Gotowe zaplecze aplikacji od Google: baza danych, logowanie, hosting i pliki w chmurze. Pozwala działać bez budowania własnego serwera.", note:"Odpowiednik Supabase z innych projektów — tu wybrano Firebase.", quote:"Firebase: Firestore, Auth, Hosting, Storage.", proj:"ONA 360" },
+  { term:"Firestore", pron:"fajer-stor", cat:"Technologia i produkt", def:"Baza danych w Firebase. Trzyma dane w „kolekcjach” i „dokumentach” (np. kolekcja pracowników, kolekcja odpowiedzi z ankiety).", note:"", quote:"Kolekcje: /employees, /evaluations_responses.", proj:"ONA 360" },
+  { term:"Chart.js / D3", pron:"czart-dżej-es / di-tri", cat:"Technologia i produkt", def:"Biblioteki do rysowania wykresów i wizualizacji danych na stronie (słupki, koła, sieci powiązań).", note:"", quote:"Chart.js do wykresów, D3 do mapy sieci.", proj:"ONA 360" },
+  { term:"SDK / zestaw narzędzi programisty", pron:"es-de-ka", cat:"Technologia i produkt", def:"Software Development Kit — paczka gotowych narzędzi do obsługi danej platformy. Np. „firebase-admin SDK” daje skryptowi pełny dostęp do bazy.", note:"", quote:"Skrypt łączy się przez firebase-admin SDK.", proj:"ONA 360" },
+  { term:"service account / konto serwisowe", pron:"serwis akałnt", cat:"Technologia i produkt", def:"Techniczne „konto dla programu” (nie dla człowieka) z uprawnieniami, dzięki któremu skrypt sam łączy się z bazą i ją czyta/zapisuje.", note:"", quote:"Skrypt działa z uprawnieniami właściciela projektu.", proj:"ONA 360" },
+  { term:"batch / zapis wsadowy", pron:"bacz", cat:"Technologia i produkt", def:"Wykonanie wielu operacji na bazie naraz, jedną paczką, zamiast pojedynczo. Firestore przyjmuje maks. ~450–500 na paczkę.", note:"Inny „batch” niż dzień badania (batchDay) — tu chodzi o paczkę zapisów.", quote:"Batch write limit: 450 docs/commit.", proj:"ONA 360" },
+  { term:"token / token dostępu", pron:"tołken", cat:"Technologia i produkt", def:"Losowy ciąg-klucz, którym pracownik wchodzi do ankiety zamiast loginu i hasła. Krótki, jednorazowy „bilet wstępu”.", note:"", quote:"accessCode / secure_access_tokens.", proj:"ONA 360" },
+  { term:"anonymous auth / logowanie anonimowe", pron:"anonimus oth", cat:"Technologia i produkt", def:"Wejście do aplikacji bez zakładania konta — system nadaje tymczasową, bezimienną tożsamość tylko na czas korzystania.", note:"", quote:"Auth (email + anonymous).", proj:"ONA 360" },
+  { term:"impersonacja / impersonation", pron:"impersonejszn", cat:"Technologia i produkt", def:"Działanie w aplikacji „jako ktoś inny” — np. admin wypełnia albo podgląda ankietę w imieniu konkretnego pracownika.", note:"", quote:"impersonatedUser ma priorytet przy zapisie oceny.", proj:"ONA 360" },
+  { term:"white-label", pron:"łajt-lejbl", cat:"Technologia i produkt", def:"Produkt bez marki twórcy, przygotowany tak, by klient oznaczył go własnym logo i kolorami — jakby był jego.", note:"W ONA realizuje to „branding konfigurowalny per klient” (logo, kolory przez supervisora).", quote:"Branding: logo i kolory konfigurowalne dla przyszłych klientów.", proj:"ONA 360" },
+
+  // ---------- TECHNOLOGIA I PRODUKT (bezpieczeństwo danych) ----------
+  { term:"hash / SHA-256", pron:"hesz", cat:"Technologia i produkt", def:"Jednokierunkowe przekształcenie danych w stały, nieczytelny ciąg znaków. Z samego hasza nie da się wprost odczytać oryginału — używane do ukrywania tożsamości oceniających.", note:"„Jednokierunkowe” w teorii — przy małej liczbie osób i znanej „soli” da się je odgadnąć metodą prób.", quote:"raterId = SHA-256(raterUID + SALT).", proj:"ONA 360" },
+  { term:"salt / sól (kryptograficzna)", pron:"solt", cat:"Technologia i produkt", def:"Tajny dodatek doklejany do danych tuż przed hashowaniem, żeby trudniej było odgadnąć oryginał. Jeśli „sól” wycieknie, ochrona słabnie.", note:"W ONA sól jest stała i zapisana w kodzie — to osłabia anonimowość ocen.", quote:"CRYPTO_SALT = stała sól zapisana w kodzie.", proj:"ONA 360" },
+
+  // ---------- PRAWO I WŁASNOŚĆ (RODO + prawo autorskie) ----------
+  { term:"RODO / GDPR", pron:"rodo / dżi-di-pi-ar", cat:"Prawo i własność", def:"Unijne przepisy o ochronie danych osobowych: jak wolno je zbierać, przechowywać i kiedy trzeba usunąć. RODO = polska nazwa, GDPR = angielska.", note:"", quote:"Eksport danych pilotażu + wygaszenie instancji (RODO).", proj:"ONA 360" },
+  { term:"DPA / umowa powierzenia danych", pron:"di-pi-ej", cat:"Prawo i własność", def:"Data Processing Agreement — umowa regulująca, jak jeden podmiot przetwarza dane osobowe w imieniu drugiego (np. Krzysztof hostuje dane pracowników klienta).", note:"Brak DPA bywa luką w umowach — uzupełnia ją osobny załącznik (DPA).", quote:"Brak umowy powierzenia danych dla badanych pracowników.", proj:"ONA 360" },
+  { term:"pseudonimizacja", pron:"", cat:"Prawo i własność", def:"Zamiana danych identyfikujących na kod lub hash, tak że bez dodatkowego klucza trudno wskazać konkretną osobę — ale teoretycznie wciąż się da.", note:"Nie to samo co anonimizacja: pseudonim można cofnąć, anonim — nie.", quote:"raterId zahashowany, ale dział i stanowisko zapisane jawnie.", proj:"ONA 360" },
+  { term:"anonimizacja", pron:"", cat:"Prawo i własność", def:"Trwałe usunięcie powiązania danych z osobą, bez możliwości odtworzenia kto jest kim. Dane przestają być „osobowe”.", note:"Mocniejsza niż pseudonimizacja — i nieodwracalna.", quote:"Badanie deklarowane pracownikom jako w pełni anonimowe.", proj:"ONA 360" },
+  { term:"art. 53 (prawo autorskie)", pron:"", cat:"Prawo i własność", def:"Przepis polskiej ustawy o prawie autorskim: przeniesienie majątkowych praw autorskich wymaga umowy na piśmie. Bez podpisanej umowy prawa zostają u twórcy — choćby zapłacono za pracę.", note:"Częsta pułapka: zapłata za pracę ≠ przeniesienie praw, jeśli nie ma umowy na piśmie.", quote:"", proj:"ONA 360" },
+
+  // ---------- PRAWO I WŁASNOŚĆ (OSA 360 — zgodność / produkcja) ----------
+  { term:"compliant / zgodny z wymogami", pron:"kom-plajent", cat:"Prawo i własność", def:"Spełniający obowiązujące przepisy lub wymagania. W naszym kontekście najczęściej zgodność aplikacji z RODO, regułami bezpieczeństwa i wymogami audytu produkcyjnego — np. „system RODO-compliant” = zbudowany tak, że przejdzie kontrolę zgodności (polityka prywatności, anonimizacja, umowa powierzenia danych).", note:"Rzeczownik to „compliance” (zgodność / pilnowanie zgodności). NIE myl z „complaint” (skarga) — bardzo podobna pisownia, zupełnie inne znaczenie.", quote:"", proj:"OSA 360" },
+
+  // ---------- TECHNOLOGIA I PRODUKT (OSA 360 — model wdrożenia) ----------
+  { term:"multi-tenant / wielu klientów w jednej instancji", pron:"malti-tenant", cat:"Technologia i produkt", def:"Model, w którym JEDNA instancja aplikacji obsługuje wielu klientów (firm) naraz, a ich dane są od siebie odseparowane (np. przez tenantId + reguły dostępu). Przeciwieństwo: osobna instancja dla każdego klienta.", note:"OSA startuje w modelu „jedna instancja per klient” (prościej, sprawdzone na Firebase). Multi-tenant to opcja na później — wtedy wraca Supabase + RLS, bo Postgres separuje najemców czysto i bezpiecznie. Pokrewne hasło: „tenant / multi-tenant” (Eventomat).", quote:"Jedna instancja per klient teraz; multi-tenant gdy model biznesowy tego zażąda.", deep:"„Tenant” to najemca. Wyobraź sobie biurowiec: jeden budynek, wielu najemców, każdy za swoimi drzwiami i nie widzi cudzych biur. Multi-tenant to ten budynek — jedna aplikacja obsługuje wielu klientów, a ściany (reguły dostępu, np. RLS) pilnują, by firma A nigdy nie zobaczyła danych firmy B. Alternatywa to budować każdemu osobny domek (instancja per klient) — prościej i bezpieczniej na start, ale przy wielu klientach męczące w utrzymaniu (każdy domek osobno aktualizujesz). OSA zaczyna od osobnych domków; gdy klientów przybędzie, biurowiec (Supabase + RLS) zacznie się opłacać.", proj:"OSA 360" },
+
+  // ---------- TECHNOLOGIA I PRODUKT (OSA 360 — bazy danych: Firebase vs Supabase) ----------
+  { term:"BaaS / Backend-as-a-Service", pron:"bas", cat:"Technologia i produkt", def:"Gotowe zaplecze aplikacji w chmurze (baza danych + logowanie + pliki + funkcje), z którego korzystasz zamiast budować własny serwer od zera. Firebase i Supabase to właśnie BaaS.", note:"Dosł. „backend jako usługa”. Skraca budowę aplikacji o tygodnie.", quote:"Oba to BaaS — załatwiają to samo zadanie dla aplikacji frontendowej.", deep:"Wyobraź sobie, że otwierasz restaurację. Zamiast budować kuchnię, magazyn, kasę i system rezerwacji od zera, wynajmujesz lokal, w którym to wszystko już działa — płacisz za użycie i skupiasz się na gotowaniu. BaaS robi to dla aplikacji: dostajesz gotową bazę danych, logowanie użytkowników, miejsce na pliki i na kod serwerowy. Dzięki temu jedna osoba zbuduje w tydzień coś, co kiedyś wymagało zespołu i miesięcy. Cena tej wygody to mniejsza kontrola nad „kuchnią” i zależność od właściciela lokalu (patrz: vendor lock-in).", proj:"OSA 360" },
+  { term:"baza relacyjna / SQL", pron:"es-ku-el", cat:"Technologia i produkt", def:"Baza oparta na tabelach powiązanych relacjami, odpytywana językiem SQL. Pozwala na złożone zapytania, łączenie danych i raporty. Postgres to baza SQL.", note:"SQL = „Structured Query Language”. Przeciwieństwo: NoSQL.", quote:"Supabase = relacyjny Postgres, SQL.", deep:"Dane leżą w tabelach — jak arkusze Excela — a tabele są ze sobą POWIĄZANE. Tabela „pracownicy” i tabela „oceny” łączą się przez wspólny identyfikator, więc jednym pytaniem zapytasz „pokaż wszystkie oceny Kowalskiego”. SQL to język tych pytań — czytelny niemal jak zdanie po angielsku („SELECT … WHERE …”). Siła bazy relacyjnej: złożone pytania i raporty liczone w samej bazie, blisko danych. To standard od dekad — stąd ogrom narzędzi, wiedzy i ludzi wokół niego.", proj:"OSA 360" },
+  { term:"NoSQL", pron:"no-es-ku-el", cat:"Technologia i produkt", def:"Baza, która NIE używa tabel ani SQL-a — trzyma dane elastycznie, najczęściej jako dokumenty (jak Firestore). Prosta i szybka, ale słaba w złożonych zapytaniach i raportach po stronie bazy.", note:"„Not only SQL”. Firestore (Firebase) to NoSQL dokumentowy.", quote:"Firestore = NoSQL, dokumenty i kolekcje.", deep:"Zamiast sztywnych tabel dane leżą jak osobne „teczki” (dokumenty), a każda może mieć inną zawartość. Świetne, gdy dane są proste i samodzielne (jeden profil = jedna teczka) i gdy zależy Ci na szybkości oraz elastyczności. Słabość ujawnia się przy pytaniach łączących wiele teczek naraz („policz średnią ocen we wszystkich działach”) — baza tego nie zrobi za Ciebie, musisz wyciągnąć teczki i policzyć w aplikacji. Firestore (z Firebase) to właśnie taka baza — dlatego w OSA wyniki liczymy po stronie przeglądarki, nie w bazie.", proj:"OSA 360" },
+  { term:"Postgres / PostgreSQL", pron:"post-gres", cat:"Technologia i produkt", def:"Dojrzała, otwarta baza relacyjna (SQL). Silnik, na którym stoi Supabase — stąd jego siła w raportach i bezpieczeństwie na poziomie wiersza.", note:"", quote:"Supabase (Postgres + RLS + Auth + Storage).", deep:"To darmowy, otwarty silnik baz relacyjnych z ponad 30-letnią historią — uchodzi za jeden z najsolidniejszych na świecie. „Otwarty” znaczy, że jego kod jest publiczny i możesz go uruchomić u siebie bez opłat licencyjnych. Supabase bierze właśnie Postgresa i dokłada do niego wygodne logowanie, pliki i automatyczne API — więc dostajesz moc dojrzałej bazy bez ręcznego konfigurowania jej od zera. Dlatego wybór Supabase to w praktyce wybór Postgresa pod spodem.", proj:"OSA 360" },
+  { term:"JOIN / złączenie", pron:"dżojn", cat:"Technologia i produkt", def:"Operacja SQL łącząca dane z kilku tabel w jednym zapytaniu (np. pracownicy + ich oceny naraz). Firestore tego NIE potrafi — dlatego w nim raporty liczy się po stronie aplikacji.", note:"Brak JOIN-ów to główne ograniczenie baz NoSQL.", quote:"Firestore: brak JOIN-ów, ograniczone zapytania złożone.", deep:"Masz dwie listy: pracowników i wystawione oceny. JOIN to polecenie „zszyj je po wspólnym identyfikatorze i pokaż jako jedno”. Bez JOIN-a musiałbyś pobrać obie listy osobno i ręcznie dopasowywać element do elementu — wolno i pracochłonnie. Bazy relacyjne (SQL) robią to błyskawicznie jednym poleceniem. NoSQL (Firestore) nie ma JOIN-ów — i to jest główny powód, dla którego w OSA łączenie danych oraz liczenie wyników dzieje się w przeglądarce, już po pobraniu danych.", proj:"OSA 360" },
+  { term:"serverless / bezserwerowo", pron:"serwerles", cat:"Technologia i produkt", def:"Model, w którym nie zarządzasz własnym serwerem — dostawca sam skaluje i utrzymuje infrastrukturę, a Ty płacisz za użycie. Firestore działa serverless.", note:"Nie znaczy „bez serwera” dosłownie — serwery są, tylko nie Twoje i niewidoczne dla Ciebie.", quote:"Firebase: skalowanie automatyczne, serverless, bezobsługowe.", deep:"Nazwa myli — serwery są, tylko przestają być Twoim zmartwieniem. Normalnie ktoś musi wynająć serwer, pilnować, czy nie padł, i dokładać moc, gdy użytkowników przybywa. W modelu serverless dostawca robi to niewidocznie: gdy nikt nie korzysta, prawie nic nie kosztuje; gdy przychodzi tłum, sam się skaluje. Płacisz za faktyczne użycie, nie za „wynajem mocy na zapas”. To jedna z głównych wygód Firebase — zero administrowania serwerem.", proj:"OSA 360" },
+  { term:"vendor lock-in / uzależnienie od dostawcy", pron:"wendor lok-in", cat:"Technologia i produkt", def:"Sytuacja, w której trudno przenieść aplikację lub dane do innego dostawcy, bo są mocno związane z jednym (np. Google/Firebase). Im większy lock-in, tym mniejsza swoboda wyjścia.", note:"Supabase = niski lock-in (to standardowy Postgres, dane wywieziesz gdziekolwiek); Firebase = wysoki.", quote:"Lock-in Google bywa argumentem za Supabase.", deep:"Im wygodniejsze narzędzie, tym łatwiej się od niego uzależnić. Lock-in to stan, w którym Twoja aplikacja jest tak spleciona z jednym dostawcą (np. Google/Firebase), że przeniesienie jej gdzie indziej oznaczałoby przepisanie połowy kodu. To nie jest złe samo w sobie — płacisz swobodą za wygodę. Ale warto wiedzieć, że płacisz: jeśli dostawca podniesie ceny albo zmieni zasady, masz słabą pozycję negocjacyjną. Supabase, oparty na otwartym Postgresie, daje tu więcej swobody wyjścia (dane wywieziesz gdziekolwiek).", proj:"OSA 360" },
+  { term:"self-hosting / hosting u siebie", pron:"self-hosting", cat:"Technologia i produkt", def:"Uruchomienie oprogramowania na własnym serwerze zamiast u dostawcy. Supabase można self-hostować (jest open-source), Firebase — nie.", note:"Powiązane: on-premise. Daje pełną kontrolę i niezależność, kosztem własnej obsługi.", quote:"Supabase: opcja self-hostu = brak lock-inu.", deep:"Większość usług działa „u dostawcy” — Twoje dane na jego serwerach. Self-hosting to odwrotność: bierzesz oprogramowanie i uruchamiasz je na własnym serwerze, pod własną kontrolą. Zaleta: pełna niezależność i prywatność, brak uzależnienia od dostawcy (vendor lock-in). Koszt: sam dbasz o aktualizacje, kopie zapasowe i o to, żeby serwer nie padł. Supabase na to pozwala (jest otwarty); Firebase nie — działa wyłącznie u Google.", proj:"OSA 360" },
+  { term:"index / indeks (bazodanowy)", pron:"indeks", cat:"Technologia i produkt", def:"Struktura przyspieszająca wyszukiwanie w bazie. W Firestore zapytania złożone wymagają ręcznego utworzenia „composite index” (indeksu złożonego), inaczej zapytanie się nie wykona.", note:"Nie myl z indeksem w książce — idea podobna (szybkie odnajdywanie), ale to mechanizm bazy.", quote:"Firestore wymaga composite indexes do złożonych zapytań.", deep:"Wyobraź sobie książkę bez spisu treści — szukając tematu, czytasz stronę po stronie. Indeks bazodanowy to ten spis: baza wie od razu, gdzie skoczyć, zamiast przeglądać wszystko po kolei. Bez indeksu zapytania na dużych danych są wolne. Firestore wymaga, byś przy bardziej złożonych pytaniach utworzył indeks ręcznie (tzw. composite index) — inaczej po prostu odmówi wykonania zapytania. To jeden z drobnych „podatków” pracy z tą bazą.", proj:"OSA 360" },
+  { term:"trigger / wyzwalacz (bazodanowy)", pron:"triger", cat:"Technologia i produkt", def:"Reguła w bazie, która automatycznie wykonuje akcję po zdarzeniu (np. po dodaniu nowej firmy utwórz jej domyślne dane). Postgres/Supabase to potrafi.", note:"Inny „trigger” niż w interfejsie — tu chodzi o automat w bazie danych.", quote:"Trigger seedujący na nowej firmie generuje domyślne definicje.", deep:"To automat „jeśli zdarzy się X, zrób Y” wbudowany w samą bazę, nie w aplikację. Przykład z OSA: gdy w bazie pojawia się nowa firma, trigger sam tworzy jej domyślne ustawienia (wektory, koszyki) — nikt nie musi tego robić ręcznie ani o tym pamiętać w kodzie. Zaleta: reguła działa zawsze, niezależnie od tego, która aplikacja dodała dane. Postgres/Supabase to potrafią; w Firestore podobne rzeczy robi się inaczej — osobnymi funkcjami w chmurze.", proj:"OSA 360" },
+  { term:"view / widok (SQL)", pron:"wju", cat:"Technologia i produkt", def:"Zapisane zapytanie udające tabelę — gotowy, wygodny „wycinek” danych do raportów, bez powtarzania skomplikowanego SQL-a za każdym razem. Funkcja baz relacyjnych.", note:"", quote:"Postgres: pełny SQL — JOIN, widoki, funkcje, agregacje.", deep:"Niektóre zapytania są długie i powtarzasz je bez końca (np. „wynik każdego pracownika z uśrednionymi ocenami”). Widok to takie zapytanie zapisane pod nazwą — od tej pory używasz go jak zwykłej tabeli, nie przepisując całej logiki za każdym razem. To porządkuje pracę i upraszcza raporty: skomplikowany SQL chowasz raz, a potem tylko „czytasz z widoku”. Funkcja baz relacyjnych; w NoSQL nie ma odpowiednika.", proj:"OSA 360" },
+  { term:"constraint / więzy integralności", pron:"konstrejnt", cat:"Technologia i produkt", def:"Reguła pilnująca poprawności danych w bazie SQL — np. „każda ocena musi wskazywać istniejącego pracownika”. Chroni przed śmieciowymi, niespójnymi danymi.", note:"Najczęstszy rodzaj to „foreign key” (klucz obcy) — powiązanie wiersza z istniejącym wpisem w innej tabeli.", quote:"Supabase: twarde więzy integralności (klucze obce, constrainty).", deep:"Baza może sama pilnować, żeby dane miały sens — zanim śmieć w ogóle do niej wpadnie. Przykład: „nie da się zapisać oceny wskazującej pracownika, którego nie ma” (to tzw. klucz obcy / foreign key). Albo „pole e-mail nie może być puste”. Bez takich więzów to aplikacja musi o wszystko zadbać, a każdy błąd w kodzie = uszkodzone dane. Constrainty (mocna strona SQL/Postgres) przenoszą tę ochronę do samej bazy — do ostatniej linii obrony, której żaden błąd aplikacji nie obejdzie.", proj:"OSA 360" },
+  { term:"aggregation / agregacja", pron:"agregejszn", cat:"Technologia i produkt", def:"Zsumowanie lub uśrednienie wielu rekordów w jeden wynik (np. średnia ocena działu, liczba badań). W bazach SQL liczona w bazie; w Firestore — po stronie aplikacji.", note:"", quote:"Scoring OSA liczy się po stronie klienta (analytics.js), nie w bazie.", deep:"Pojedyncze dane to drzewa; agregacja to spojrzenie na cały las. Zamiast 500 ocen widzisz „średnia działu = 4,1” albo „liczba badań w tym miesiącu = 12”. W bazach SQL liczysz to jednym poleceniem wprost w bazie (szybko, blisko danych). W Firestore baza tego nie zrobi — pobierasz surowe dane i agregujesz w aplikacji. W OSA scoring liczy się właśnie po stronie przeglądarki, co przy obecnej skali jest w pełni wystarczające.", proj:"OSA 360" },
+
+  // ---------- TECHNOLOGIA I PRODUKT (Koduj z Sensem — narzędzia, metody, sesja 2026-06-14) ----------
+  { term:"Astro", pron:"astro", cat:"Technologia i produkt", def:"Framework do budowania szybkich stron i aplikacji, który domyślnie wysyła do przeglądarki czysty HTML (mało JavaScriptu) — świetny pod SEO i szybkość. Na nim stoi strona Koduj z Sensem.", note:"", quote:"Astro 6 + Tailwind — stack Koduj z Sensem.", deep:"Większość frameworków (jak React) wysyła do przeglądarki dużo JavaScriptu, który dopiero buduje stronę — wolniej i gorzej dla Google. Astro odwraca to: renderuje stronę do gotowego HTML już przy budowaniu, a JavaScript dokłada tylko tam, gdzie naprawdę trzeba interaktywności (tzw. wyspy). Efekt: strony ładują się błyskawicznie i łatwo je zindeksować. Dla treściowego, publicznego produktu (jak słownik) to idealny wybór.", proj:"Koduj z Sensem" },
+  { term:"Vercel", pron:"wersel", cat:"Technologia i produkt", def:"Platforma do hostowania (publikowania) stron i aplikacji w internecie. Łączysz repozytorium z kodem, a Vercel sam buduje i wystawia stronę pod adresem — z automatycznym wdrożeniem po każdej zmianie.", note:"", quote:"Deploy na Vercel → slownik.kodujzsensem.pl.", proj:"Koduj z Sensem" },
+  { term:"SSG / generowanie statyczne", pron:"es-es-dżi", cat:"Technologia i produkt", def:"Static Site Generation — strona budowana z góry do gotowych plików HTML (raz, przy publikacji), zamiast składana na żywo przy każdym wejściu. Szybka i świetna pod SEO, bo treść jest od razu w HTML.", note:"Para pojęć: SSR (HTML składany na serwerze przy żądaniu) i CSR (budowany w przeglądarce przez JavaScript).", quote:"Render statyczny (SSG) zamiast client-side.", deep:"Są trzy główne sposoby serwowania stron. SSG: gotowy HTML zrobiony zawczasu — najszybszy, idealny dla treści rzadko zmiennej (słownik). SSR: HTML składany na serwerze przy każdym żądaniu — dla treści zmiennej per użytkownik. CSR: przeglądarka buduje stronę JavaScriptem — elastyczne, ale wolniejsze i słabsze pod SEO (tak działa dziś stary słowniczek). Faza 1 słownika idzie w SSG, bo treść haseł jest statyczna.", proj:"Koduj z Sensem" },
+  { term:"SRS / system powtórek", pron:"es-er-es", cat:"Technologia i produkt", def:"Spaced Repetition System — metoda nauki, w której materiał wraca do powtórki w rosnących odstępach: to, co znasz, pokazuje się rzadziej, a to, czego nie znasz — częściej. Serce trybu nauki (swipe) w słowniku.", note:"Polski akcent: SuperMemo (Piotr Woźniak) to pionier tej metody.", quote:"znam→mastery↑, nie→kolejka powtórek (lekki SRS).", deep:"Pamięć działa tak, że najwięcej zapominamy tuż po nauce, a każda powtórka „w samą porę” utrwala wiedzę na dłużej. SRS to wykorzystuje: po każdej ocenie hasła system planuje, KIEDY pokazać je znowu. Umiesz → odstęp rośnie (dzień, trzy dni, tydzień…). Nie umiesz → wraca szybko. Dzięki temu uczysz się efektywnie, nie tracąc czasu na to, co już znasz. Na tym stoją Anki i SuperMemo. W słowniku zaczynamy od lekkiej wersji, pełny algorytm dochodzi później.", proj:"Koduj z Sensem" },
+  { term:"slug", pron:"slag", cat:"Technologia i produkt", def:"Krótki, uproszczony identyfikator tekstowy bez polskich znaków i spacji, tworzony z nazwy — np. „JOIN / złączenie” → „join-zlaczenie”. Używany jako stabilny klucz hasła i w adresach stron.", note:"W adresach stron slug to ta czytelna końcówka, np. /blog/jak-uczyc-sie-kodu.", quote:"Wprowadzamy stabilne id (slug) zamiast kluczowania po tekście.", proj:"Koduj z Sensem" },
+  { term:"TDD / programowanie sterowane testami", pron:"te-de-de", cat:"Technologia i produkt", def:"Test-Driven Development — metoda, w której NAJPIERW piszesz test sprawdzający oczekiwanie, patrzysz jak nie przechodzi, a dopiero potem kod, który go zalicza. Test prowadzi pisanie kodu.", note:"", quote:"TDD dla logiki: slug → linkify → store.", deep:"Brzmi odwrotnie do intuicji (test przed kodem!), ale ma sens: zanim coś zbudujesz, musisz jasno określić, co ma robić — a test to precyzyjny opis tego oczekiwania. Cykl: czerwony (napisz test, który nie przechodzi) → zielony (najprostszy kod, który go zalicza) → refaktor (posprzątaj, mając test jako siatkę bezpieczeństwa). Zaleta: kod od początku jest sprawdzalny i odporny na późniejsze psucie. W planie słownika logikę piszemy właśnie w TDD.", proj:"Koduj z Sensem" },
+  { term:"service worker", pron:"serwis łorker", cat:"Technologia i produkt", def:"Mały skrypt działający w tle przeglądarki, który potrafi przechwytywać żądania i serwować zapisane wcześniej pliki — dzięki niemu aplikacja webowa (PWA) działa offline.", note:"To on stoi za „działa bez internetu” w PWA — podaje zapisaną kopię, gdy sieci brak.", quote:"Service worker → cache treści = działanie offline.", proj:"Koduj z Sensem" },
+  { term:"progressive enhancement / stopniowe wzbogacanie", pron:"progresiw enhansment", cat:"Technologia i produkt", def:"Zasada budowania: najpierw działająca treść w czystym HTML (działa u każdego), a interaktywność (JavaScript) dokładasz NA WIERZCH jako bonus. Strona działa nawet, gdy JS się nie wczyta.", note:"Przeciwieństwo podejścia „wszystko zależy od JavaScriptu”, które pada całkowicie, gdy skrypt zawiedzie.", quote:"Treść działa bez JS, interaktywność dochodzi na wierzch.", proj:"Koduj z Sensem" },
+  { term:"localStorage / pamięć przeglądarki", pron:"lokal storydż", cat:"Technologia i produkt", def:"Małe miejsce na dane zapisywane przez stronę bezpośrednio w Twojej przeglądarce, na Twoim urządzeniu — przetrwa zamknięcie karty. Tu trzymane są np. Twoje gwiazdki „znam”.", note:"Dane są per urządzenie i per przeglądarka — nie synchronizują się między telefonem a laptopem (do tego trzeba bazy/konta). Dlatego sync to dopiero Faza 2.", quote:"Gwiazdki i dopiski → localStorage (per urządzenie).", proj:"Koduj z Sensem" },
+];
+
+/* ---------- mapowanie kategorii na klasy kolorów ---------- */
+const CATCLASS = {
+  "Negocjacje":"t-neg",
+  "Prawo i własność":"t-praw",
+  "Biznes i finanse":"t-biz",
+  "Technologia i produkt":"t-tech",
+  "Branża i operacje":"t-bran",
+  "Pliki i formaty":"t-pliki",
+  "Moje dopiski":"t-moje",
+};
+const CATS = ["Wszystkie","Negocjacje","Prawo i własność","Biznes i finanse","Technologia i produkt","Branża i operacje","Pliki i formaty"];
+
+const PROJ_DEFAULT = "Budowlanka";
+const LS_KEY  = "slownik-global-dodane";
+const LS_FAM  = "slownik-global-znajomosc";
+const LS_SORT = "slownik-global-sort";
+const LS_HIDE = "slownik-global-hide";
+let activeCat = "Wszystkie";
+let activeProj = "Wszystkie";
+let query = "";
+let sortMode = localStorage.getItem(LS_SORT) || "temat";   // "temat" | "alfa"
+let hideMastered = localStorage.getItem(LS_HIDE) === "1";
+let showRecent = false;            // filtr "Ostatnie dodane"
+const RECENT_N = 30;               // ile najnowszych haseł pokazuje filtr
+
+function loadFam(){ try{ return JSON.parse(localStorage.getItem(LS_FAM)) || {}; }catch(e){ return {}; } }
+function saveFam(f){ localStorage.setItem(LS_FAM, JSON.stringify(f)); }
+function getLevel(term){ return loadFam()[term] || 0; }
+function setLevel(term,lvl){ const f=loadFam(); if(lvl<=0) delete f[term]; else f[term]=lvl; saveFam(f); }
+
+function loadLocal(){
+  try{ return JSON.parse(localStorage.getItem(LS_KEY)) || []; }catch(e){ return []; }
+}
+function allTerms(){
+  const local = loadLocal().map(t => ({...t, cat:t.cat, _local:true}));
+  return [...TERMY, ...local];
+}
+function projOf(t){ return (t.proj && t.proj.trim()) ? t.proj.trim() : PROJ_DEFAULT; }
+function allProjects(){
+  return [...new Set(allTerms().map(projOf))].sort((a,b)=>a.localeCompare(b,"pl",{sensitivity:"base"}));
+}
+
+function norm(s){
+  return (s||"").toLowerCase()
+    .normalize("NFD").replace(/[̀-ͯ]/g,""); // bez ogonków przy szukaniu
+}
+
+function plural(n){
+  if(n===1) return "hasło";
+  const t=n%10, h=n%100;
+  return (t>=2 && t<=4 && !(h>=12 && h<=14)) ? "hasła" : "haseł";
+}
+
+function getFiltered(){
+  const q = norm(query);
+  const fam = loadFam();
+  const all = allTerms();
+  const hayOf = t => norm(t.term+" "+t.def+" "+(t.note||"")+" "+(t.quote||"")+" "+projOf(t));
+
+  // Filtr "Ostatnie dodane": najnowsze (koniec tablicy) najpierw, limit RECENT_N.
+  // Respektuje wyszukiwarkę i "ukryj opanowane", ignoruje chipy kategoria/projekt (to osobny widok).
+  if(showRecent){
+    return all
+      .map((t,i)=>({t,i}))
+      .sort((a,b)=>b.i-a.i)
+      .slice(0, RECENT_N)
+      .map(x=>x.t)
+      .filter(t=>{
+        const queryOk = q==="" || hayOf(t).includes(q);
+        const masteredOk = !hideMastered || (fam[t.term]||0) < 3;
+        return queryOk && masteredOk;
+      });
+  }
+
+  let arr = all.filter(t=>{
+    const catOk = activeCat==="Wszystkie" || t.cat===activeCat || (activeCat==="Moje dopiski" && t._local);
+    const projOk = activeProj==="Wszystkie" || projOf(t)===activeProj;
+    const queryOk = q==="" || hayOf(t).includes(q);
+    const masteredOk = !hideMastered || (fam[t.term]||0) < 3;
+    return catOk && projOk && queryOk && masteredOk;
+  });
+  if(sortMode==="alfa"){
+    arr = arr.slice().sort((a,b)=>a.term.localeCompare(b.term,"pl",{sensitivity:"base"}));
+  }
+  return arr;
+}
+
+function updateCount(){
+  const total = allTerms().length;
+  const n = getFiltered().length;
+  const narrowed = query || activeCat!=="Wszystkie" || activeProj!=="Wszystkie" || hideMastered || showRecent;
+  document.getElementById("totalCount").textContent = total;
+  const np = allProjects().length;
+  const pc = document.getElementById("projCount"); if(pc) pc.textContent = np;
+  const pw = document.getElementById("projWord"); if(pw) pw.textContent = (np===1?"projekt":(np%10>=2&&np%10<=4&&!(np%100>=12&&np%100<=14)?"projekty":"projektów"));
+  document.getElementById("countbar").textContent =
+    n + " " + plural(n) + (narrowed ? " (z " + total + ")" : "");
+}
+
+function starsHTML(term){
+  const lvl = getLevel(term);
+  return `<span class="stars" data-term="${esc(term)}" title="Kliknij gwiazdki: jak dobrze już znasz to słowo (0–3)">`
+    + `<span class="stars-label">znam</span>`
+    + [1,2,3].map(n=>`<button class="star${lvl>=n?' on':''}" data-lvl="${n}" aria-label="Znam na ${n} z 3">★</button>`).join("")
+    + `</span>`;
+}
+
+function render(){
+  const list = document.getElementById("list");
+  const filtered = getFiltered();
+  updateCount();
+
+  if(filtered.length===0){
+    const reason = query ? "Nic nie pasuje do „"+esc(query)+"”."
+                 : hideMastered ? "Wszystkie widoczne hasła masz oznaczone jako opanowane. 🎉"
+                 : "Brak haseł w tej kategorii.";
+    list.innerHTML = '<div class="empty">'+reason+'<br>Zmień filtr albo dodaj nowe słowo niżej.</div>';
+    return;
+  }
+
+  rebuildLinkIndex();
+  list.innerHTML = filtered.map((t,i)=>{
+    const cls = CATCLASS[t.cat] || (t._local?"t-moje":"t-pliki");
+    const catLabel = t._local ? "Moje · "+t.cat : t.cat;
+    return `<article class="entry" style="animation-delay:${Math.min(i*28,380)}ms">
+      <div class="entry-head">
+        <span class="term">${esc(t.term)}</span>
+        ${t.pron?`<span class="pron">${esc(t.pron)}</span>`:""}
+        <span class="tag ${cls}">${esc(catLabel)}</span>
+        <span class="projtag">${esc(projOf(t))}</span>
+        ${starsHTML(t.term)}
+      </div>
+      <p class="def">${linkify(t.def, t.term)}</p>
+      ${t.deep?`<button class="deep-toggle" type="button">Wyjaśnij głębiej ▸</button><div class="deep-body" hidden>${linkify(t.deep, t.term)}</div>`:""}
+      ${t.note?`<p class="note"><b>Nie myl:</b> ${linkify(t.note, t.term)}</p>`:""}
+      ${t.quote?`<p class="quote"><span>W naszej rozmowie</span>„${esc(t.quote)}”</p>`:""}
+    </article>`;
+  }).join("");
+}
+
+function esc(s){return (s||"").replace(/[&<>]/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;"}[c]));}
+
+/* ---------- inline-linkowanie terminów (drążenie zamiast ślepych zaułków) ---------- */
+function escAttr(s){return esc(s).replace(/"/g,"&quot;");}
+function escapeRegex(s){return s.replace(/[.*+?^${}()|[\]\\]/g,"\\$&");}
+const LINK_LETTERS = "A-Za-z0-9À-ÿĄąĆćĘꣳŃńÓóŚśŹźŻż";
+let LINK_MAP = new Map();
+let LINK_RE = null;
+function buildLinkPairs(){
+  const pairs = [];
+  allTerms().forEach(t=>{
+    t.term.replace(/\([^)]*\)/g," ").split("/").forEach(part=>{
+      const phrase = part.trim();
+      if(phrase.length >= 3) pairs.push({ phrase, target: t.term });
+    });
+  });
+  return pairs.sort((a,b)=>b.phrase.length - a.phrase.length); // dłuższe frazy mają pierwszeństwo
+}
+function rebuildLinkIndex(){
+  const pairs = buildLinkPairs();
+  LINK_MAP = new Map();
+  const alts = [];
+  pairs.forEach(({phrase,target})=>{
+    const key = phrase.toLowerCase();
+    if(!LINK_MAP.has(key)) LINK_MAP.set(key, target);
+    alts.push(escapeRegex(esc(phrase)));
+  });
+  LINK_RE = alts.length ? new RegExp(`(?<![${LINK_LETTERS}])(${alts.join("|")})(?![${LINK_LETTERS}])`,"gi") : null;
+}
+function linkify(text, selfTerm){
+  if(!text) return "";
+  const safe = esc(text);
+  if(!LINK_RE) return safe;
+  const used = new Set();
+  return safe.replace(LINK_RE,(m)=>{
+    const target = LINK_MAP.get(m.toLowerCase());
+    if(!target || target===selfTerm || used.has(target)) return m;
+    used.add(target);
+    return `<a class="deflink" data-target="${escAttr(target)}">${m}</a>`;
+  });
+}
+
+/* ---------- chips ---------- */
+function buildChips(){
+  const wrap = document.getElementById("chips");
+  const local = loadLocal();
+  const cats = local.length ? [...CATS,"Moje dopiski"] : CATS;
+  wrap.innerHTML = cats.map(c=>`<button class="chip${c===activeCat?' active':''}" data-cat="${esc(c)}">${esc(c)}</button>`).join("");
+  wrap.querySelectorAll(".chip").forEach(b=>b.onclick=()=>{activeCat=b.dataset.cat;buildChips();render();});
+}
+
+/* ---------- chipy projektów ---------- */
+function buildProjChips(){
+  const wrap = document.getElementById("projChips");
+  if(!wrap) return;
+  const projs = ["Wszystkie", ...allProjects()];
+  wrap.innerHTML = projs.map(p=>`<button class="chip${p===activeProj?' active':''}" data-proj="${esc(p)}">${esc(p)}</button>`).join("");
+  wrap.querySelectorAll(".chip").forEach(b=>b.onclick=()=>{activeProj=b.dataset.proj;buildProjChips();render();});
+}
+function buildProjDatalist(){
+  const dl = document.getElementById("projlist");
+  if(dl) dl.innerHTML = allProjects().map(p=>`<option value="${esc(p)}">`).join("");
+}
+
+/* ---------- search ---------- */
+document.getElementById("q").addEventListener("input",e=>{query=e.target.value;render();});
+
+/* ---------- toast ---------- */
+let toastT;
+function toast(msg){
+  const el=document.getElementById("toast");
+  el.textContent=msg;el.classList.add("show");
+  clearTimeout(toastT);toastT=setTimeout(()=>el.classList.remove("show"),2200);
+}
+
+/* ---------- add form ---------- */
+document.getElementById("addToggle").onclick=()=>document.getElementById("addbox").classList.toggle("open");
+
+document.getElementById("f-save").onclick=()=>{
+  const term=document.getElementById("f-term").value.trim();
+  const def=document.getElementById("f-def").value.trim();
+  if(!term||!def){toast("Podaj przynajmniej słowo i jego znaczenie.");return;}
+  const entry={
+    term, def,
+    pron:document.getElementById("f-pron").value.trim(),
+    cat:document.getElementById("f-cat").value,
+    proj:document.getElementById("f-proj").value.trim(),
+    note:document.getElementById("f-note").value.trim(),
+    deep:document.getElementById("f-deep").value.trim(),
+    quote:""
+  };
+  const local=loadLocal();local.push(entry);
+  localStorage.setItem(LS_KEY,JSON.stringify(local));
+  ["f-term","f-pron","f-def","f-note","f-deep","f-proj"].forEach(id=>document.getElementById(id).value="");
+  buildChips();buildProjChips();buildProjDatalist();render();
+  toast("Dodano „"+term+"” ("+(entry.proj||PROJ_DEFAULT)+", zapisane w tej przeglądarce).");
+};
+
+document.getElementById("f-export").onclick=()=>{
+  const local=loadLocal();
+  if(!local.length){toast("Nie masz jeszcze własnych dopisków.");return;}
+  const txt=JSON.stringify(local,null,2);
+  navigator.clipboard.writeText(txt).then(
+    ()=>toast("Skopiowano "+local.length+" dopisków — wklej je Claude'owi do scalenia."),
+    ()=>toast("Nie udało się skopiować — zaznacz ręcznie.")
+  );
+};
+
+/* ---------- gwiazdki znajomości ---------- */
+document.getElementById("list").addEventListener("click", e=>{
+  // inline-link do innego hasła → przeskocz i pokaż je (drążenie)
+  const link = e.target.closest(".deflink");
+  if(link){
+    // zapamiętaj skąd przyszliśmy, by dało się wrócić
+    navStack.push({ query, activeCat, activeProj, scrollY: window.scrollY });
+    const target = link.dataset.target;
+    activeCat = "Wszystkie"; activeProj = "Wszystkie";
+    query = target;
+    const qBox = document.getElementById("q"); if(qBox) qBox.value = target;
+    buildChips(); buildProjChips(); render();
+    window.scrollTo({top:0, behavior:"smooth"});
+    updateBackBtn();
+    return;
+  }
+  // rozwijanie warstwy „głębiej”
+  const dt = e.target.closest(".deep-toggle");
+  if(dt){
+    const body = dt.nextElementSibling;
+    if(body && body.hasAttribute("hidden")){ body.removeAttribute("hidden"); dt.textContent = "Zwiń wyjaśnienie ▾"; }
+    else if(body){ body.setAttribute("hidden",""); dt.textContent = "Wyjaśnij głębiej ▸"; }
+    return;
+  }
+  const btn = e.target.closest(".star");
+  if(!btn) return;
+  const widget = btn.closest(".stars");
+  const term = widget.dataset.term;
+  let lvl = +btn.dataset.lvl;
+  if(getLevel(term) === lvl) lvl = lvl - 1;   // ponowny klik w najwyższą gwiazdkę = zdejmij
+  setLevel(term, lvl);
+  widget.querySelectorAll(".star").forEach(s=>s.classList.toggle("on", +s.dataset.lvl <= lvl));
+
+  if(hideMastered && lvl>=3){
+    const entry = widget.closest(".entry");
+    entry.style.transition = "opacity .3s ease, transform .3s ease";
+    entry.style.opacity = "0";
+    entry.style.transform = "translateX(14px)";
+    setTimeout(()=>{ entry.remove(); updateCount(); }, 300);
+  } else {
+    updateCount();
+  }
+});
+
+/* ---------- sortowanie ---------- */
+const sortBtn = document.getElementById("sortToggle");
+function syncSortLabel(){
+  document.getElementById("sortLabel").textContent =
+    sortMode==="alfa" ? "Kolejność: A–Z" : "Kolejność: tematyczna";
+  sortBtn.setAttribute("aria-pressed", sortMode==="alfa");
+  sortBtn.classList.toggle("active", sortMode==="alfa");
+}
+sortBtn.onclick = ()=>{
+  sortMode = sortMode==="alfa" ? "temat" : "alfa";
+  localStorage.setItem(LS_SORT, sortMode);
+  syncSortLabel(); render();
+};
+
+/* ---------- ostatnie dodane ---------- */
+const recentBtn = document.getElementById("recentToggle");
+function syncRecent(){
+  recentBtn.setAttribute("aria-pressed", showRecent);
+  recentBtn.classList.toggle("active", showRecent);
+}
+recentBtn.onclick = ()=>{
+  showRecent = !showRecent;
+  syncRecent(); render();
+};
+
+/* ---------- powrót z linku (historia drążenia) ---------- */
+const navStack = [];
+function updateBackBtn(){
+  const b = document.getElementById("backBtn");
+  if(b) b.style.display = navStack.length ? "inline-flex" : "none";
+}
+document.getElementById("backBtn").onclick = ()=>{
+  const prev = navStack.pop();
+  if(!prev) return;
+  query = prev.query; activeCat = prev.activeCat; activeProj = prev.activeProj;
+  const qBox = document.getElementById("q"); if(qBox) qBox.value = query;
+  buildChips(); buildProjChips(); render();
+  window.scrollTo({ top: prev.scrollY, behavior: "smooth" });
+  updateBackBtn();
+};
+
+/* ---------- ukrywanie opanowanych ---------- */
+const hideChk = document.getElementById("hideMastered");
+hideChk.checked = hideMastered;
+hideChk.addEventListener("change", e=>{
+  hideMastered = e.target.checked;
+  localStorage.setItem(LS_HIDE, hideMastered ? "1" : "0");
+  render();
+});
+
+/* ---------- init ---------- */
+buildChips();
+buildProjChips();
+buildProjDatalist();
+syncSortLabel();
+syncRecent();
+render();
+</script>
+</body>
+</html>
