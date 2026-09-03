@@ -352,6 +352,10 @@ font-style:italic;color:var(--ink-soft);font-size:.98rem;
    proj — kod traktuje brak proj jako "Budowlanka" (PROJ_DEFAULT). Nowe hasła z innych
    projektów dodawaj z jawnym proj, np. proj:"Eventomat". */
 const TERMY = [
+  // ---------- Portfel: decyzja Claude Max 20x, prorata, Fable (2026-09-03) ----------
+  { term:"prorata (rozliczenie proporcjonalne)", pron:"pro-rata", cat:"Biznes i finanse", def:"Rozliczenie subskrypcji <b>proporcjonalnie do czasu</b>, jaki został do końca opłaconego okresu — przy zmianie planu w trakcie miesiąca płacisz tylko za dni, które faktycznie obejmuje nowy plan.", note:"Typowy wzorzec przy podwyżce planu: działa <b>od razu</b>, a niewykorzystany czas ze starego planu jest zaliczany na poczet nowego. Przy obniżce zwykle NIE ma zwrotu różnicy — zmiana wchodzi w życie dopiero na koniec opłaconego okresu. Sprawdzone przy zmianie planu Claude (Max 20x).", quote:"upgrade natychmiastowy z proratą, downgrade dopiero na koniec opłaconego okresu", proj:"Portfel" },
+  { term:"usage credits (kredyty za nadwyżkę)", pron:"julidż kredits", cat:"Biznes i finanse", def:"Płatność <b>za sztukę</b> (pay-as-you-go) za to, co przekracza wliczony limit abonamentu — zamiast blokady dostępu po wyczerpaniu limitu, nadwyżka jest po prostu doliczana osobno.", note:"Odwrotność „w limicie planu”: dopóki mieścisz się w abonamencie, nie płacisz nic dodatkowego; nadwyżka jest rozliczana według odrębnego (zwykle wyższego) cennika. W Claude dotyczy np. modeli klasy [[Fable (klasa modeli nad Opusem)|Fable]] na planie Pro — tam nie są wliczone w abonament, tylko całkowicie na usage credits.", quote:"Pro i Team Standard mają dostęp do Fable wyłącznie przez usage credits", proj:"Portfel" },
+  { term:"Fable (klasa modeli nad Opusem)", pron:"fejbl", cat:"Technologia i produkt", def:"Najwyższa dziś klasa modeli Anthropica — <b>ponad</b> Opusem, nie obok niego. Łamie starszą intuicję „Opus to najlepszy model, jaki jest”.", note:"Wprowadzona lipiec–wrzesień 2026 (Fable 5, potem Fable 5.1). Wliczona w plan Claude wyłącznie od progu Max (5x/20x, do 50% tygodniowego limitu bez dopłat) — na Pro i Team Standard trzeba dopłacać osobno ([[usage credits (kredyty za nadwyżkę)]]).", quote:"nowa klasa modeli nad Opusem, wprowadzona lipiec-wrzesień 2026", proj:"Portfel" },
   // ---------- Frachtomat / zadanie 9: schemat bazy z RLS, recenzja uprawnień (2026-09-03) ----------
   { term:"default privileges (domyślne uprawnienia)", pron:"difolt priwilydżys", cat:"Technologia i produkt", def:"Reguła bazy danych mówiąca, jakie uprawnienia dostanie automatycznie <b>każda przyszła tabela</b>, zanim ktokolwiek nada je ręcznie. Działa na obiekty, które jeszcze nie istnieją — i dlatego łatwo o niej zapomnieć.", note:"🔴 Najgroźniejsza cecha: <b>maskuje brak uprawnień w migracji</b>. W Frachtomacie migracja nadawała dostęp tylko roli <code>authenticated</code>, a wszystkie testy przechodziły — bo lokalny stack Supabase ma stare domyślne uprawnienia dające <b>pełny dostęp wszystkim rolom</b>. Na świeżym projekcie w chmurze rola serwerowa nie dostałaby nic i padłaby cała warstwa zapisu. Lokalne środowisko <b>nie jest w stanie tego wykryć</b>. ⚠️ Druga pułapka: samo odebranie uprawnień istniejącym tabelom nie chroni <b>następnej migracji</b> — nowa tabela znów wystartuje dziurawa, dopóki nie zmienisz właśnie domyślnych uprawnień. I jeszcze jedna: takie odebranie obejmuje tabele i funkcje, ale <b>nie sekwencje</b>. 🎯 Dowodem jest zapytanie do <code>information_schema.role_table_grants</code>, nigdy „u mnie działa”. Pokrewne: [[RLS]].", quote:"Działało lokalnie, bo baza rozdała uprawnienia za mnie.", proj:"Frachtomat" },
   { term:"PostgREST", pron:"post-gres-t", cat:"Technologia i produkt", def:"Warstwa, która <b>zamienia schemat bazy danych w API HTTP</b> — każda tabela i funkcja widoczna w wystawionym schemacie staje się adresem, pod który można wysłać żądanie z przeglądarki. Serce Supabase.", note:"🔴 Konsekwencja, którą łatwo przeoczyć: <b>funkcja w bazie to publiczny endpoint</b>, jeśli leży w wystawionym schemacie. W Frachtomacie funkcja czyszcząca stare oferty miała podniesione uprawnienia (żeby ominąć [[RLS]] przy sprzątaniu) i była wywoływalna <b>kluczem publicznym, tym samym, który trafia do kodu strony</b> — każdy mógł skasować dane wszystkich klientów naraz. Kod był poprawny; wadą było to, <b>komu wolno go wywołać</b>. 🎯 Zasada: po każdej funkcji z podniesionymi uprawnieniami sprawdź listę uprawnionych do jej wywołania (<code>pg_proc.proacl</code>) i odbierz dostęp rolom publicznym. Pokrewne: [[default privileges (domyślne uprawnienia)]].", quote:"To nie była funkcja w bazie, tylko adres w internecie.", proj:"Frachtomat" },
@@ -1162,3 +1166,366 @@ const TERMY = [
   { term:"runner (maszyna CI)", pron:"RANER", cat:"Technologia i produkt", def:"Cudza, czysta maszyna, na której testy biegną <b>po każdym wysłaniu zmian</b> — inna niż komputer, na którym je pisałeś.", note:"Cała jej wartość bierze się z tego, czym <b>różni się</b> od Twojego sprzętu, i tam też siedzą pułapki. Dwie zmierzone u nas (Eventomat, S189): <b>(1) nie ma plików spoza repozytorium</b> — konfiguracja z danymi klientki jest celowo nieśledzona, więc u nas jest, a tam jej nie ma i test pada na czymś, czego żaden bieg lokalny nie wykryje; <b>(2) jest około dwa razy wolniejsza</b> — limit czasu pojedynczego testu dobrany na szybkim laptopie przestaje wystarczać, a objaw jest mylący (u nas wyglądało to dokładnie jak zepsute logowanie, choć był to zwykły upływ czasu). ⚠️ Bieg na runnerze <b>nie zastępuje</b> biegu lokalnego przy diagnozie — to dwa różne pomiary, nie ten sam w dwóch miejscach. 💰 I ma cenę: pełny bieg zajmuje u nas ~40 minut z miesięcznego limitu 2000 minut, czyli starcza na jakieś 50 biegów. Pokrewne: [[test E2E (end-to-end)]], [[flaky (test niestabilny)]], [[błąd kolekcji (collection error)]].", quote:"„trzy tygodnie pełnych bramek lokalnie tego nie znalazły — pierwszy bieg na CI znalazł od razu” — Eventomat, S189", proj:"Eventomat" },
   { term:"gałąź-sierota", pron:"gałąź sierota", cat:"Sposób pracy", def:"Boczna ścieżka pracy, która nigdy nie została formalnie połączona z główną — choć to, co na niej zrobiono, dawno już w głównej jest.", note:"Powstaje, gdy treść przenosi się <b>inną drogą niż połączenie gałęzi</b>: ktoś przepisuje zmianę ręcznie albo powtarza ją w nowej sesji. Nic nie pada, nikt nie dostaje ostrzeżenia — gałąź po prostu zostaje i z czasem coraz bardziej odstaje. ⚠️ Pułapka przy sprzątaniu: kusi, żeby ją „dokończyć” połączeniem, a to bywa <b>cofnięciem</b>, bo główna gałąź ma nad nią kilkanaście nowszych zmian. U nas (Eventomat, S189) taka gałąź wisiała od 31.08, a główna miała nad nią <b>16</b> zmian, w tym cały nowy moduł. 🔴 Zanim skasujesz, sprawdź <b>dwie rzeczy osobno</b>: czy jej praca jest w głównej gałęzi (po treści, nie po numerze zmiany) i ile główna ma nad nią. Zapisz też identyfikator — odtworzenie to jedno polecenie. 🎯 Warto wiedzieć, że lista otwartych zgłoszeń jej <b>nie pokazuje</b>, bo zgłoszenia nigdy nie miała; widać ją dopiero w wykazie gałęzi zdalnych. Pokrewne: [[squash merge]], [[revert (git)]].", quote:"„skill twierdził: zdalnie sam main plus trzy gałęzie Dependabota — o czwartej nie wiedział” — Eventomat, S189", proj:"Eventomat" },
 ];
+/* ---------- mapowanie kategorii na klasy kolorów ---------- */
+const CATCLASS = {
+  "Negocjacje":"t-neg",
+  "Prawo i własność":"t-praw",
+  "Biznes i finanse":"t-biz",
+  "Technologia i produkt":"t-tech",
+  "Branża i operacje":"t-bran",
+  "Pliki i formaty":"t-pliki",
+  "Moje dopiski":"t-moje",
+};
+const CATS = ["Wszystkie","Negocjacje","Prawo i własność","Biznes i finanse","Technologia i produkt","Branża i operacje","Pliki i formaty"];
+
+const PROJ_DEFAULT = "Budowlanka";
+const LS_KEY  = "slownik-global-dodane";
+const LS_FAM  = "slownik-global-znajomosc";
+const LS_SORT = "slownik-global-sort";
+const LS_HIDE = "slownik-global-hide";
+let activeCat = "Wszystkie";
+let activeProj = "Wszystkie";
+let query = "";
+let sortMode = localStorage.getItem(LS_SORT) || "temat";   // "temat" | "alfa"
+let hideMastered = localStorage.getItem(LS_HIDE) === "1";
+let showRecent = false;            // filtr "Ostatnie dodane"
+const RECENT_N = 30;               // ile najnowszych haseł pokazuje filtr
+
+function loadFam(){ try{ return JSON.parse(localStorage.getItem(LS_FAM)) || {}; }catch(e){ return {}; } }
+function saveFam(f){ localStorage.setItem(LS_FAM, JSON.stringify(f)); }
+function getLevel(term){ return loadFam()[term] || 0; }
+function setLevel(term,lvl){ const f=loadFam(); if(lvl<=0) delete f[term]; else f[term]=lvl; saveFam(f); }
+
+function loadLocal(){
+  try{ return JSON.parse(localStorage.getItem(LS_KEY)) || []; }catch(e){ return []; }
+}
+function allTerms(){
+  const local = loadLocal().map(t => ({...t, cat:t.cat, _local:true}));
+  return [...TERMY, ...local];
+}
+function projOf(t){ return (t.proj && t.proj.trim()) ? t.proj.trim() : PROJ_DEFAULT; }
+function allProjects(){
+  return [...new Set(allTerms().map(projOf))].sort((a,b)=>a.localeCompare(b,"pl",{sensitivity:"base"}));
+}
+
+function norm(s){
+  return (s||"").toLowerCase()
+    .normalize("NFD").replace(/[̀-ͯ]/g,""); // bez ogonków przy szukaniu
+}
+
+function plural(n){
+  if(n===1) return "hasło";
+  const t=n%10, h=n%100;
+  return (t>=2 && t<=4 && !(h>=12 && h<=14)) ? "hasła" : "haseł";
+}
+
+function getFiltered(){
+  const q = norm(query);
+  const fam = loadFam();
+  const all = allTerms();
+  const hayOf = t => norm(t.term+" "+t.def+" "+(t.note||"")+" "+(t.quote||"")+" "+projOf(t));
+
+  // Filtr "Ostatnie dodane": najnowsze (koniec tablicy) najpierw, limit RECENT_N.
+  // Respektuje wyszukiwarkę i "ukryj opanowane", ignoruje chipy kategoria/projekt (to osobny widok).
+  if(showRecent){
+    return all
+      .map((t,i)=>({t,i}))
+      .sort((a,b)=>b.i-a.i)
+      .slice(0, RECENT_N)
+      .map(x=>x.t)
+      .filter(t=>{
+        const queryOk = q==="" || hayOf(t).includes(q);
+        const masteredOk = !hideMastered || (fam[t.term]||0) < 3;
+        return queryOk && masteredOk;
+      });
+  }
+
+  let arr = all.filter(t=>{
+    const catOk = activeCat==="Wszystkie" || t.cat===activeCat || (activeCat==="Moje dopiski" && t._local);
+    const projOk = activeProj==="Wszystkie" || projOf(t)===activeProj;
+    const queryOk = q==="" || hayOf(t).includes(q);
+    const masteredOk = !hideMastered || (fam[t.term]||0) < 3;
+    return catOk && projOk && queryOk && masteredOk;
+  });
+  if(sortMode==="alfa"){
+    arr = arr.slice().sort((a,b)=>a.term.localeCompare(b.term,"pl",{sensitivity:"base"}));
+  }
+  return arr;
+}
+
+function updateCount(){
+  const total = allTerms().length;
+  const n = getFiltered().length;
+  const narrowed = query || activeCat!=="Wszystkie" || activeProj!=="Wszystkie" || hideMastered || showRecent;
+  document.getElementById("totalCount").textContent = total;
+  const np = allProjects().length;
+  const pc = document.getElementById("projCount"); if(pc) pc.textContent = np;
+  const pw = document.getElementById("projWord"); if(pw) pw.textContent = (np===1?"projekt":(np%10>=2&&np%10<=4&&!(np%100>=12&&np%100<=14)?"projekty":"projektów"));
+  document.getElementById("countbar").textContent =
+    n + " " + plural(n) + (narrowed ? " (z " + total + ")" : "");
+}
+
+function starsHTML(term){
+  const lvl = getLevel(term);
+  return `<span class="stars" data-term="${esc(term)}" title="Kliknij gwiazdki: jak dobrze już znasz to słowo (0–3)">`
+    + `<span class="stars-label">znam</span>`
+    + [1,2,3].map(n=>`<button class="star${lvl>=n?' on':''}" data-lvl="${n}" aria-label="Znam na ${n} z 3">★</button>`).join("")
+    + `</span>`;
+}
+
+function render(){
+  const list = document.getElementById("list");
+  const filtered = getFiltered();
+  updateCount();
+
+  if(filtered.length===0){
+    const reason = query ? "Nic nie pasuje do „"+esc(query)+"”."
+                 : hideMastered ? "Wszystkie widoczne hasła masz oznaczone jako opanowane. 🎉"
+                 : "Brak haseł w tej kategorii.";
+    list.innerHTML = '<div class="empty">'+reason+'<br>Zmień filtr albo dodaj nowe słowo niżej.</div>';
+    return;
+  }
+
+  rebuildLinkIndex();
+  list.innerHTML = filtered.map((t,i)=>{
+    const cls = CATCLASS[t.cat] || (t._local?"t-moje":"t-pliki");
+    const catLabel = t._local ? "Moje · "+t.cat : t.cat;
+    return `<article class="entry" style="animation-delay:${Math.min(i*28,380)}ms">
+      <div class="entry-head">
+        <span class="term">${esc(t.term)}</span>
+        ${t.pron?`<span class="pron">${esc(t.pron)}</span>`:""}
+        <span class="tag ${cls}">${esc(catLabel)}</span>
+        <span class="projtag">${esc(projOf(t))}</span>
+        ${starsHTML(t.term)}
+      </div>
+      <p class="def">${linkify(t.def, t.term)}</p>
+      ${t.deep?`<button class="deep-toggle" type="button">Wyjaśnij głębiej ▸</button><div class="deep-body" hidden>${linkify(t.deep, t.term)}</div>`:""}
+      ${t.note?`<p class="note"><b>Nie myl:</b> ${linkify(t.note, t.term)}</p>`:""}
+      ${t.quote?`<p class="quote"><span>W naszej rozmowie</span>„${esc(t.quote)}”</p>`:""}
+    </article>`;
+  }).join("");
+}
+
+function esc(s){return (s||"").replace(/[&<>]/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;"}[c]));}
+
+/* ---------- inline-linkowanie terminów (drążenie zamiast ślepych zaułków) ---------- */
+function escAttr(s){return esc(s).replace(/"/g,"&quot;");}
+function escapeRegex(s){return s.replace(/[.*+?^${}()|[\]\\]/g,"\\$&");}
+const LINK_LETTERS = "A-Za-z0-9À-ÿĄąĆćĘꣳŃńÓóŚśŹźŻż";
+let LINK_MAP = new Map();
+let LINK_RE = null;
+function buildLinkPairs(){
+  const pairs = [];
+  allTerms().forEach(t=>{
+    t.term.replace(/\([^)]*\)/g," ").split("/").forEach(part=>{
+      const phrase = part.trim();
+      if(phrase.length >= 3) pairs.push({ phrase, target: t.term });
+    });
+  });
+  return pairs.sort((a,b)=>b.phrase.length - a.phrase.length); // dłuższe frazy mają pierwszeństwo
+}
+function rebuildLinkIndex(){
+  const pairs = buildLinkPairs();
+  LINK_MAP = new Map();
+  const alts = [];
+  pairs.forEach(({phrase,target})=>{
+    const key = phrase.toLowerCase();
+    if(!LINK_MAP.has(key)) LINK_MAP.set(key, target);
+    alts.push(escapeRegex(esc(phrase)));
+  });
+  LINK_RE = alts.length ? new RegExp(`(?<![${LINK_LETTERS}])(${alts.join("|")})(?![${LINK_LETTERS}])`,"gi") : null;
+}
+function linkify(text, selfTerm){
+  if(!text) return "";
+  const safe = esc(text);
+  if(!LINK_RE) return safe;
+  const used = new Set();
+  return safe.replace(LINK_RE,(m)=>{
+    const target = LINK_MAP.get(m.toLowerCase());
+    if(!target || target===selfTerm || used.has(target)) return m;
+    used.add(target);
+    return `<a class="deflink" data-target="${escAttr(target)}">${m}</a>`;
+  });
+}
+
+/* ---------- chips ---------- */
+function buildChips(){
+  const wrap = document.getElementById("chips");
+  const local = loadLocal();
+  const cats = local.length ? [...CATS,"Moje dopiski"] : CATS;
+  wrap.innerHTML = cats.map(c=>`<button class="chip${c===activeCat?' active':''}" data-cat="${esc(c)}">${esc(c)}</button>`).join("");
+  wrap.querySelectorAll(".chip").forEach(b=>b.onclick=()=>{activeCat=b.dataset.cat;buildChips();render();});
+}
+
+/* ---------- chipy projektów ---------- */
+function buildProjChips(){
+  const wrap = document.getElementById("projChips");
+  if(!wrap) return;
+  const projs = ["Wszystkie", ...allProjects()];
+  wrap.innerHTML = projs.map(p=>`<button class="chip${p===activeProj?' active':''}" data-proj="${esc(p)}">${esc(p)}</button>`).join("");
+  wrap.querySelectorAll(".chip").forEach(b=>b.onclick=()=>{activeProj=b.dataset.proj;buildProjChips();render();});
+}
+function buildProjDatalist(){
+  const dl = document.getElementById("projlist");
+  if(dl) dl.innerHTML = allProjects().map(p=>`<option value="${esc(p)}">`).join("");
+}
+
+/* ---------- search ---------- */
+document.getElementById("q").addEventListener("input",e=>{query=e.target.value;render();});
+
+/* ---------- toast ---------- */
+let toastT;
+function toast(msg){
+  const el=document.getElementById("toast");
+  el.textContent=msg;el.classList.add("show");
+  clearTimeout(toastT);toastT=setTimeout(()=>el.classList.remove("show"),2200);
+}
+
+/* ---------- add form ---------- */
+document.getElementById("addToggle").onclick=()=>document.getElementById("addbox").classList.toggle("open");
+
+document.getElementById("f-save").onclick=()=>{
+  const term=document.getElementById("f-term").value.trim();
+  const def=document.getElementById("f-def").value.trim();
+  if(!term||!def){toast("Podaj przynajmniej słowo i jego znaczenie.");return;}
+  const entry={
+    term, def,
+    pron:document.getElementById("f-pron").value.trim(),
+    cat:document.getElementById("f-cat").value,
+    proj:document.getElementById("f-proj").value.trim(),
+    note:document.getElementById("f-note").value.trim(),
+    deep:document.getElementById("f-deep").value.trim(),
+    quote:""
+  };
+  const local=loadLocal();local.push(entry);
+  localStorage.setItem(LS_KEY,JSON.stringify(local));
+  ["f-term","f-pron","f-def","f-note","f-deep","f-proj"].forEach(id=>document.getElementById(id).value="");
+  buildChips();buildProjChips();buildProjDatalist();render();
+  toast("Dodano „"+term+"” ("+(entry.proj||PROJ_DEFAULT)+", zapisane w tej przeglądarce).");
+};
+
+document.getElementById("f-export").onclick=()=>{
+  const local=loadLocal();
+  if(!local.length){toast("Nie masz jeszcze własnych dopisków.");return;}
+  const txt=JSON.stringify(local,null,2);
+  navigator.clipboard.writeText(txt).then(
+    ()=>toast("Skopiowano "+local.length+" dopisków — wklej je Claude'owi do scalenia."),
+    ()=>toast("Nie udało się skopiować — zaznacz ręcznie.")
+  );
+};
+
+/* ---------- gwiazdki znajomości ---------- */
+document.getElementById("list").addEventListener("click", e=>{
+  // inline-link do innego hasła → przeskocz i pokaż je (drążenie)
+  const link = e.target.closest(".deflink");
+  if(link){
+    // zapamiętaj skąd przyszliśmy, by dało się wrócić
+    navStack.push({ query, activeCat, activeProj, scrollY: window.scrollY });
+    const target = link.dataset.target;
+    activeCat = "Wszystkie"; activeProj = "Wszystkie";
+    query = target;
+    const qBox = document.getElementById("q"); if(qBox) qBox.value = target;
+    buildChips(); buildProjChips(); render();
+    window.scrollTo({top:0, behavior:"smooth"});
+    updateBackBtn();
+    return;
+  }
+  // rozwijanie warstwy „głębiej”
+  const dt = e.target.closest(".deep-toggle");
+  if(dt){
+    const body = dt.nextElementSibling;
+    if(body && body.hasAttribute("hidden")){ body.removeAttribute("hidden"); dt.textContent = "Zwiń wyjaśnienie ▾"; }
+    else if(body){ body.setAttribute("hidden",""); dt.textContent = "Wyjaśnij głębiej ▸"; }
+    return;
+  }
+  const btn = e.target.closest(".star");
+  if(!btn) return;
+  const widget = btn.closest(".stars");
+  const term = widget.dataset.term;
+  let lvl = +btn.dataset.lvl;
+  if(getLevel(term) === lvl) lvl = lvl - 1;   // ponowny klik w najwyższą gwiazdkę = zdejmij
+  setLevel(term, lvl);
+  widget.querySelectorAll(".star").forEach(s=>s.classList.toggle("on", +s.dataset.lvl <= lvl));
+
+  if(hideMastered && lvl>=3){
+    const entry = widget.closest(".entry");
+    entry.style.transition = "opacity .3s ease, transform .3s ease";
+    entry.style.opacity = "0";
+    entry.style.transform = "translateX(14px)";
+    setTimeout(()=>{ entry.remove(); updateCount(); }, 300);
+  } else {
+    updateCount();
+  }
+});
+
+/* ---------- sortowanie ---------- */
+const sortBtn = document.getElementById("sortToggle");
+function syncSortLabel(){
+  document.getElementById("sortLabel").textContent =
+    sortMode==="alfa" ? "Kolejność: A–Z" : "Kolejność: tematyczna";
+  sortBtn.setAttribute("aria-pressed", sortMode==="alfa");
+  sortBtn.classList.toggle("active", sortMode==="alfa");
+}
+sortBtn.onclick = ()=>{
+  sortMode = sortMode==="alfa" ? "temat" : "alfa";
+  localStorage.setItem(LS_SORT, sortMode);
+  syncSortLabel(); render();
+};
+
+/* ---------- ostatnie dodane ---------- */
+const recentBtn = document.getElementById("recentToggle");
+function syncRecent(){
+  recentBtn.setAttribute("aria-pressed", showRecent);
+  recentBtn.classList.toggle("active", showRecent);
+}
+recentBtn.onclick = ()=>{
+  showRecent = !showRecent;
+  syncRecent(); render();
+};
+
+/* ---------- powrót z linku (historia drążenia) ---------- */
+const navStack = [];
+function updateBackBtn(){
+  const b = document.getElementById("backBtn");
+  if(b) b.style.display = navStack.length ? "inline-flex" : "none";
+}
+document.getElementById("backBtn").onclick = ()=>{
+  const prev = navStack.pop();
+  if(!prev) return;
+  query = prev.query; activeCat = prev.activeCat; activeProj = prev.activeProj;
+  const qBox = document.getElementById("q"); if(qBox) qBox.value = query;
+  buildChips(); buildProjChips(); render();
+  window.scrollTo({ top: prev.scrollY, behavior: "smooth" });
+  updateBackBtn();
+};
+
+/* ---------- ukrywanie opanowanych ---------- */
+const hideChk = document.getElementById("hideMastered");
+hideChk.checked = hideMastered;
+hideChk.addEventListener("change", e=>{
+  hideMastered = e.target.checked;
+  localStorage.setItem(LS_HIDE, hideMastered ? "1" : "0");
+  render();
+});
+
+/* ---------- zwijanie filtrów na telefonie ---------- */
+const filtersToggle = document.getElementById("filtersToggle");
+if(filtersToggle){
+  filtersToggle.onclick = ()=>{
+    const f = document.getElementById("filters");
+    const open = f.classList.toggle("open");
+    filtersToggle.setAttribute("aria-expanded", open);
+    filtersToggle.textContent = open ? "Filtry ▴" : "Filtry ▾";
+  };
+}
+
+/* ---------- init ---------- */
+buildChips();
+buildProjChips();
+buildProjDatalist();
+syncSortLabel();
+syncRecent();
+render();
+</script>
+</body>
+</html>
