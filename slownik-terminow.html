@@ -157,6 +157,7 @@
   .tag.t-pliki{background:var(--ink-soft)}
   .tag.t-moje{background:#3a6ea5}
   .tag.t-bran{background:#7a5230}
+  .tag.t-sposob{background:#4a6b52}
   .projtag{
     font-family:"Fraunces",serif;font-size:.62rem;letter-spacing:.1em;text-transform:uppercase;
     padding:.18rem .55rem;border-radius:999px;border:1.5px solid var(--rule);
@@ -309,6 +310,7 @@ font-style:italic;color:var(--ink-soft);font-size:.98rem;
           <option value="Technologia i produkt">Technologia i produkt</option>
           <option value="Branża i operacje">Branża i operacje</option>
           <option value="Pliki i formaty">Pliki i formaty</option>
+          <option value="Sposób pracy">Sposób pracy</option>
         </select>
       </div>
       <div class="field"><label>Projekt (gdzie hasło padło)</label>
@@ -339,6 +341,13 @@ font-style:italic;color:var(--ink-soft);font-size:.98rem;
      pron  — wymowa po polsku, dla angielskich słów (opcjonalne, "" jeśli brak)
      cat   — jedna z: "Negocjacje" | "Prawo i własność" | "Biznes i finanse"
               | "Technologia i produkt" | "Pliki i formaty" | "Branża i operacje"
+              | "Sposób pracy"
+              (2026-09-14: dopisano "Sposób pracy" — używało jej już 11 haseł, a nie było
+               jej NIGDZIE poza danymi: ani w instrukcji, ani w CATS, ani w <option>, ani
+               w CATCLASS. Skutek był podwójny: brak chipa filtra dla tych haseł ORAZ kolor
+               plakietki brany z fallbacku, czyli cudzy ("Pliki i formaty"). Ta sama wada co
+               przy "Branża i operacje" 2026-08-08 — dodając kategorię, dopisz ją w PIĘCIU
+               miejscach, nie w jednym)
               (2026-08-08: dopisano "Branża i operacje" — używało jej już 40 haseł
                ADR/transport/hotelarstwo, a instrukcja jej nie wymieniała, więc walidacja
                kategorii pokazywała je jako błędne)
@@ -1269,9 +1278,10 @@ const CATCLASS = {
   "Technologia i produkt":"t-tech",
   "Branża i operacje":"t-bran",
   "Pliki i formaty":"t-pliki",
+  "Sposób pracy":"t-sposob",
   "Moje dopiski":"t-moje",
 };
-const CATS = ["Wszystkie","Negocjacje","Prawo i własność","Biznes i finanse","Technologia i produkt","Branża i operacje","Pliki i formaty"];
+const CATS = ["Wszystkie","Negocjacje","Prawo i własność","Biznes i finanse","Technologia i produkt","Branża i operacje","Pliki i formaty","Sposób pracy"];
 
 const PROJ_DEFAULT = "Budowlanka";
 const LS_KEY  = "slownik-global-dodane";
